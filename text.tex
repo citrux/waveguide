@@ -78,7 +78,11 @@
     \]
     Учтём теперь вид поля в волноводе, и получим
     \[
-        \Delta_\perp \vec{E}(x,y) + (g^2)\vec{E}(x,y) = 0.
+        \Delta_\perp \vec{E}(x,y) + g^2\vec{E}(x,y) = 0.
+    \]
+    Совершенно аналогично можно получить для магнитного поля
+    \[
+        \Delta_\perp \vec{H}(x,y) + g^2\vec{H}(x,y) = 0.
     \]
     А теперь к задаче.
 
@@ -121,17 +125,17 @@
 На контуре волновода касательная составляющая электрического поля равна нулю,
 поэтому
     \[
-        E_{1z} = Z^e_1\sin u^e_1 (x-a) \sin \frac{\pi n_1}{b}y
+        E_{1z} = E_1\sin u^e_1 (x-a) \sin \frac{\pi n_1}{b}y
         e^{i(\omega t - h_1 z)},\quad
-        E_{2z} = Z^e_2\sin u^e_2 x \sin \frac{\pi n_2}{b}y
+        E_{2z} = E_2\sin u^e_2 x \sin \frac{\pi n_2}{b}y
         e^{i(\omega t - h_2 z)}.
     \]
 Также, учтём, что на границе раздела касательная компонента поля \( \vec{E} \)
 непрерывна:
     \[
-        Z^e_1\sin u^e_1 (c-a) \sin \frac{\pi n_1}{b}y
+        E_1\sin u^e_1 (c-a) \sin \frac{\pi n_1}{b}y
         e^{i(\omega t - h_1 z)} =
-        Z^e_2\sin u^e_2 c \sin \frac{\pi n_2}{b}y
+        E_2\sin u^e_2 c \sin \frac{\pi n_2}{b}y
         e^{i(\omega t - h_2 z)}.
     \]
 Равенство должно выполняться при любых \( y \) и \( z \), поэтому
@@ -144,7 +148,7 @@
     -\frac{i}{g_1^2}\left( h\pder{E_{1z}}{x} + \omega\mu\pder{H_{1z}}{y} \right)
     =\\
     & = -\frac{ie^{i(\omega t - h z)}}{g_1^2}
-    \left( h Z^e_1 u^e_1 \cos u^e_1(x-a)\sin\frac{\pi n}{b}y +
+    \left( h E_1 u^e_1 \cos u^e_1(x-a)\sin\frac{\pi n}{b}y +
     \omega\mu(A^m_1\cos u^m_1 x + B^m_1\sin u^m_1 x)
     (-C^m_1 v^m_1 \sin v^m_1 y + D^m_1 v^m_1 \cos v^m_1 y)\right).
 \end{align*}
@@ -168,27 +172,27 @@
 \begin{align*}
     & E_{1y} = -\frac{i}{g_1^2}\left( h\pder{E_{1z}}{y} -
     \omega\mu\pder{H_{1z}}{x} \right) = \\
-    & = -\frac{ie^{i(\omega t - hz)}}{g_1^2}\left( h Z^e_1 \frac{\pi n}{b}
+    & = -\frac{ie^{i(\omega t - hz)}}{g_1^2}\left( h E_1 \frac{\pi n}{b}
     \sin u^e_1(x-a)\cos\frac{\pi n}{b}y - \omega\mu
     u^m_1 (-A^m_1 \sin u^m_1 x + B^m_1\cos u^m_1 x)\cos\frac{\pi m_1}{b}y
    \right)
 \end{align*}
 В силу условия \( \left.E_{1y}\right|_{x=a} = 0 \)
-\( -A^m_1 \sin u^m_1 x + B^m_1\cos u^m_1 x = A^m_1\sin u^m_1(x-a) \).
-Аналогично, во второй области имеем \(B^m_1=0 \). В силу непрерывности на
-границе раздела \( E_y \), имеем \( m_1 = m_2 = n \).
+\( -A^m_1 \sin u^m_1 x + B^m_1\cos u^m_1 x = H_1\sin u^m_1(x-a) \).
+Аналогично, во второй области имеем \(B^m_2=0, A^m_2 = H_2\).
+В силу непрерывности на границе раздела \( E_y \), имеем \( m_1 = m_2 = n \).
 
 Выпишем полученные выражения для компонент полей:
 \[
     \left\{
     \begin{array}{l}
-        E_{1z} = Z^e_1\sin u^e_1 (x-a) \sin \frac{\pi n}{b}y
+        E_{1z} = E_1\sin u^e_1 (x-a) \sin \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        H_{1z} = Z^m_1\cos u^m_1 (x-a) \cos \frac{\pi n}{b}y
+        H_{1z} = H_1\cos u^m_1 (x-a) \cos \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        E_{2z} = Z^e_2\sin u^e_2 x \sin \frac{\pi n}{b}y
+        E_{2z} = E_2\sin u^e_2 x \sin \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        H_{2z} = Z^m_2\cos u^m_2 x \cos \frac{\pi n}{b}y
+        H_{2z} = H_2\cos u^m_2 x \cos \frac{\pi n}{b}y
         e^{i(\omega t - h z)}.
     \end{array}
     \right.
@@ -201,13 +205,13 @@
 \[
     \left\{
     \begin{array}{l}
-        E_{1z} = Z^e_1\sin u_1 (x-a) \sin \frac{\pi n}{b}y
+        E_{1z} = E_1\sin u_1 (x-a) \sin \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        H_{1z} = Z^m_1\cos u_1 (x-a) \cos \frac{\pi n}{b}y
+        H_{1z} = H_1\cos u_1 (x-a) \cos \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        E_{2z} = Z^e_2\sin u_2 x \sin \frac{\pi n}{b}y
+        E_{2z} = E_2\sin u_2 x \sin \frac{\pi n}{b}y
         e^{i(\omega t - h z)},\\
-        H_{2z} = Z^m_2\cos u_2 x \cos \frac{\pi n}{b}y
+        H_{2z} = H_2\cos u_2 x \cos \frac{\pi n}{b}y
         e^{i(\omega t - h z)}.
     \end{array}
     \right.
@@ -217,28 +221,28 @@
     \left\{
     \begin{array}{l}
         E_{1x} = -\frac{i e^{i(\omega t - h z)}}{g_1^2}
-        \left(h u_1 Z^e_1 - \omega\mu_1\frac{\pi n}{b}Z^m_1\right)
+        \left(h u_1 E_1 - \omega\mu_1\frac{\pi n}{b}H_1\right)
         \cos u_1 (x-a) \sin \frac{\pi n}{b}y,\\
         H_{1x} = \frac{i e^{i(\omega t - h z)}}{g_1^2}
-        \left(\omega\eps_1\frac{\pi n}{b}Z^e_1+h u_1 Z^m_1\right)
+        \left(\omega\eps_1\frac{\pi n}{b}E_1+h u_1 H_1\right)
         \sin u_1 (x-a) \cos \frac{\pi n}{b}y,\\
         E_{1y} = -\frac{i e^{i(\omega t - h z)}}{g_1^2}
-        \left(h \frac{\pi n}{b} Z^e_1 + \omega\mu_1u_1Z^m_1\right)
+        \left(h \frac{\pi n}{b} E_1 + \omega\mu_1u_1H_1\right)
         \sin u_1 (x-a) \cos \frac{\pi n}{b}y,\\
         H_{1y} = -\frac{i e^{i(\omega t - h z)}}{g_1^2}
-        \left(\omega\eps_1u_1Z^e_1-h \frac{\pi n}{b} Z^m_1\right)
+        \left(\omega\eps_1u_1E_1-h \frac{\pi n}{b} H_1\right)
         \cos u_1 (x-a) \sin \frac{\pi n}{b}y,\\
         E_{2x} = -\frac{i e^{i(\omega t - h z)}}{g_2^2}
-        \left(h u_2 Z^e_2 - \omega\mu_2\frac{\pi n}{b}Z^m_2\right)
+        \left(h u_2 E_2 - \omega\mu_2\frac{\pi n}{b}H_2\right)
         \cos u_2 x \sin \frac{\pi n}{b}y,\\
         H_{2x} = \frac{i e^{i(\omega t - h z)}}{g_2^2}
-        \left(\omega\eps_2\frac{\pi n}{b}Z^e_2+h u_2 Z^m_2\right)
+        \left(\omega\eps_2\frac{\pi n}{b}E_2+h u_2 H_2\right)
         \sin u_2 x \cos \frac{\pi n}{b}y,\\
         E_{2y} = -\frac{i e^{i(\omega t - h z)}}{g_2^2}
-        \left(h \frac{\pi n}{b} Z^e_2 + \omega\mu_2u_2Z^m_2\right)
+        \left(h \frac{\pi n}{b} E_2 + \omega\mu_2u_2H_2\right)
         \sin u_2 x \cos \frac{\pi n}{b}y,\\
         H_{2y} = -\frac{i e^{i(\omega t - h z)}}{g_2^2}
-        \left(\omega\eps_2u_2Z^e_2-h \frac{\pi n}{b} Z^m_2\right)
+        \left(\omega\eps_2u_2E_2-h \frac{\pi n}{b} H_2\right)
         \cos u_2 x \sin \frac{\pi n}{b}y.
     \end{array}
     \right.
@@ -248,41 +252,42 @@
 \[
 \begin{array}{cl}
     E_{y1} = E_{y2}: &
-    \frac{1}{g_1^2} \left(h \frac{\pi n}{b} Z^e_1 + \omega\mu_1u_1Z^m_1\right)
+    \frac{1}{g_1^2} \left(h \frac{\pi n}{b} E_1 + \omega\mu_1u_1H_1\right)
     \sin u_1 (c-a) =  \frac{1}{g_2^2}
-    \left(h \frac{\pi n}{b} Z^e_2 + \omega\mu_2u_2Z^m_2\right)
+    \left(h \frac{\pi n}{b} E_2 + \omega\mu_2u_2H_2\right)
     \sin u_2 c ;\\
-    E_{z1} = E_{z2}: & Z^e_1\sin u_1 (c-a) = Z^e_2\sin u_2 c; \\
+    E_{z1} = E_{z2}: & E_1\sin u_1 (c-a) = E_2\sin u_2 c; \\
     H_{y1} = H_{y2}: &
-    \frac{1}{g_1^2}\left(\omega\eps_1u_1Z^e_1-h \frac{\pi n}{b} Z^m_1\right)
+    \frac{1}{g_1^2}\left(\omega\eps_1u_1E_1-h \frac{\pi n}{b} H_1\right)
     \cos u_1 (c-a) = \frac{1}{g_2^2}
-    \left(\omega\eps_2u_2Z^e_2-h \frac{\pi n}{b} Z^m_2\right)\cos u_2 c ;\\
-    H_{z1} = H_{z2}: & Z^m_1\cos u_1 (c-a) = Z^m_2\cos u_2 c.\\
+    \left(\omega\eps_2u_2E_2-h \frac{\pi n}{b} H_2\right)\cos u_2 c ;\\
+    H_{z1} = H_{z2}: & H_1\cos u_1 (c-a) = H_2\cos u_2 c.\\
 \end{array}
 \]
-Выразим амплитуды во второй области через амплитуды в первой:
+Выразим амплитуды во второй области через амплитуды в первой из четных уравнений
+системы и подставим в нечётные:
 \[
 \begin{array}{l}
-    \frac{1}{g_1^2} \left(h \frac{\pi n}{b} Z^e_1 + \omega\mu_1u_1Z^m_1\right)
+    \frac{1}{g_1^2} \left(h \frac{\pi n}{b} E_1 + \omega\mu_1u_1H_1\right)
     \sin u_1 (c-a) =  \frac{1}{g_2^2}
-    \left(h \frac{\pi n}{b} Z^e_1 \sin u_1(c-a) +
-    \omega\mu_2u_2Z^m_1\cos u_1 (c-a) \tg u_2 c \right) ;\\
-    \frac{1}{g_1^2}\left(\omega\eps_1u_1Z^e_1-h \frac{\pi n}{b} Z^m_1\right)
+    \left(h \frac{\pi n}{b} E_1 \sin u_1(c-a) +
+    \omega\mu_2u_2H_1\cos u_1 (c-a) \tg u_2 c \right) ;\\
+    \frac{1}{g_1^2}\left(\omega\eps_1u_1E_1-h \frac{\pi n}{b} H_1\right)
     \cos u_1 (c-a) = \frac{1}{g_2^2}
-    \left(\omega\eps_2u_2Z^e_1\sin u_1(c-a)\ctg u_2 c-
-    h \frac{\pi n}{b} Z^m_1\cos u_1 (c-a)\right) ;\\
+    \left(\omega\eps_2u_2E_1\sin u_1(c-a)\ctg u_2 c-
+    h \frac{\pi n}{b} H_1\cos u_1 (c-a)\right) ;\\
 \end{array}
 \]
 перегруппируем
 \[
 \begin{array}{l}
-    Z^e_1\left(\frac{1}{g_1^2} h \frac{\pi n}{b}\sin u_1 (c-a) -
+    E_1\left(\frac{1}{g_1^2} h \frac{\pi n}{b}\sin u_1 (c-a) -
     \frac{1}{g_2^2}h \frac{\pi n}{b}\sin u_1(c-a)\right) =
-    Z^m_1\left(\frac{1}{g_2^2}\omega\mu_2u_2Z^m_1\cos u_1 (c-a) \tg u_2 c-
+    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2H_1\cos u_1 (c-a) \tg u_2 c-
     \frac{1}{g_1^2}\omega\mu_1u_1\sin u_1 (c-a)\right);\\
-    Z^e_1\left(\frac{1}{g_1^2}\omega\eps_1u_1\cos u_1 (c-a)-
-    \frac{1}{g_2^2}\omega\eps_2u_2Z^e_1\sin u_1(c-a)\ctg u_2 c\right)=
-    Z^m_1\left(\frac{1}{g_1^2}h \frac{\pi n}{b} \cos u_1 (c-a)-
+    E_1\left(\frac{1}{g_1^2}\omega\eps_1u_1\cos u_1 (c-a)-
+    \frac{1}{g_2^2}\omega\eps_2u_2E_1\sin u_1(c-a)\ctg u_2 c\right)=
+    H_1\left(\frac{1}{g_1^2}h \frac{\pi n}{b} \cos u_1 (c-a)-
     \frac{1}{g_2^2}h \frac{\pi n}{b} \cos u_1 (c-a)\right)
 \end{array}
 \]
@@ -349,10 +354,19 @@
     \omega^2u_1u_2\left(\eps_1\mu_2 A +
     \eps_2\mu_1\frac{1}{A}\right),
 \]
+Теперь как проще упростить?
 \[
-    2\frac{h^2\pi^2n^2}{b^2} = (u_2^2 + \frac{\pi^2n^2}{b^2})
-    \left(u_1^2+h^2\right) +
-    (u_1^2 + \frac{\pi^2n^2}{b^2})\left(u_2^2 + h^2\right)-
+    2\frac{h^2\pi^2n^2}{b^2} =
+    \beta_1^2 g_2^2 + \beta_2^2 g_1^2 -
+    (g_1^2+g_2^2)\frac{\pi^2n^2}{b^2} -
+    \omega^2u_1u_2\left(\eps_1\mu_2 A +
+    \eps_2\mu_1\frac{1}{A}\right),
+\]
+\[
+    2\frac{h^2\pi^2n^2}{b^2} =
+    \beta_1^2 g_2^2 + \beta_2^2 g_1^2 -
+    (\beta_1^2+\beta_2^2)\frac{\pi^2n^2}{b^2} +
+    2\frac{h^2\pi^2n^2}{b^2} -
     \omega^2u_1u_2\left(\eps_1\mu_2 A +
     \eps_2\mu_1\frac{1}{A}\right),
 \]
@@ -361,6 +375,7 @@
     \omega^2u_1u_2\left(\eps_1\mu_2 A +
     \eps_2\mu_1\frac{1}{A}\right),
 \]
+Подставляем выражение для \( \beta \) и получаем:
 \[
     \eps_1\mu_1\frac{u_2}{u_1} + \eps_2\mu_2\frac{u_1}{u_2} =
     \eps_1\mu_2 A + \eps_2\mu_1\frac{1}{A}
