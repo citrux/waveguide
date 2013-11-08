@@ -1,5 +1,8 @@
 # coding: utf-8
-
+###############################################################################
+# графическое решение дисперсионного уравнения
+# совместимо и с python 3, и c python 3
+###############################################################################
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
@@ -9,61 +12,87 @@ from math import pi, tan
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-e1 = 1.0
-e2 = 5.0
-l1 = 3.5
-l2 = 1.5
-
-OMEGA = np.linspace(2e10,6e10,5)
+e1, m1, l1 = 1.0, 1.0, 3.5
+e2, m2, l2 = 5.0, 1.0, 1.5
 c = 3e10
+OMEGA = np.linspace(2e10, 6e10, 5)
 
-def fun(k1, k2):
-    return k1 * tan(k1 * l1) / e1 + k2 * tan(k2 * l2) / e2
+def fun1(u1, u2):
+    return u1 * tan(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
 
-def dichotomy(f, a, b):
-    eps = 0.005
-    c = (a+b)/2
-    if b-a < eps:
-        return c
-    elif f(a)*f(b) > 0:
+def fun2(u1, u2):
+    return m1 * tan(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
+
+def bisection(f, left, right):
+    """
+    Метод бисекции поиска корня (трансцендентного) уравнения
+    """
+    precision = 0.005
+    center = (left+right)/2.0
+    if right-left < precision:
+        return center
+    elif f(left)*f(right) > 0:
         return False
-    elif abs(f(a)) < eps:
-        return a
-    elif abs(f(b)) < eps:
-        return b
+    elif abs(f(left)) < precision:
+        return left
+    elif abs(f(right)) < precision:
+        return right
     else:
-        if f(c)*f(a) <= 0:
-            return dichotomy(f, a, c)
+        if f(center)*f(left) <= 0:
+            return bisection(f, left, center)
         else:
-            return dichotomy(f, c, b)
+            return bisection(f, center, right)
 
 
 def solution(n1, n2):
     delta = 0.005
-    K1 = np.arange(n1*pi/2/l1+delta, (n1+1)*pi/2/l1-delta, delta)
-    x,y = [],[]
-    for i in K1:
-        j = dichotomy(lambda x: fun(i,x),
-                n2*pi/2/l2+delta, (n2+1)*pi/2/l2-delta)
-        if j:
-            x.append(i)
-            y.append(j)
-    plt.plot(x,y,"k-")
 
-for i in range(9):
-    n = 2 * i + 1
-    for i in range(n+1):
-        solution(i,n-i)
+    # границы области, в которой ищется решение
+    left = n1*pi/2.0/l1
+    right = (n1+1)*pi/2.0/l1
+    bottom = n2*pi/2.0/l2
+    top = (n2+1)*pi/2.0/l2
+
+    U1 = np.arange(left + delta, right - delta, delta)
+    x,y = [],[]
+    for u1 in U1:
+        u2 = bisection(lambda u2: fun2(u1,u2), bottom + delta, top - delta)
+        if u2:
+            x.append(u1)
+            y.append(u2)
+    return x, y
+
 
 def hyperbole(omega):
-    k1_list = np.linspace(0, 4, 100)
-    k2_list = list(map(lambda x: ((e2-e1)*omega**2/c**2 + x**2), k1_list))
-    plt.plot(k1_list, k2_list, "k--")
+    U1 = np.linspace(0, 4, 100)
+    u2 = lambda u1: ((e2-e1)*omega**2/c**2 + u1**2)**0.5
+    U2 = list(map(u2, U1))
+    plt.plot(U1, U2, "k--")
 
-for omega in OMEGA:
-    hyperbole(omega)
 
-plt.xlabel(r"$k_1, cm^{-1}$")
-plt.ylabel(r"$k_2, cm^{-1}$")
+def plot():
+    for i in range(9):
+        n = 2 * i + 1
+        for i in range(n+1):
+            u1, u2 = solution(i,n-i)
+            plt.plot(u1, u2, "k-")
+            # нарисуем границы прямоугольников
+            left = i*pi/2.0/l1
+            right = (i+1)*pi/2.0/l1
+            bottom = (n-i)*pi/2.0/l2
+            top = (n-i+1)*pi/2.0/l2
+            plt.plot([right, left, left, right, right],
+                    [bottom, bottom, top, top, bottom], "k:")
 
-plt.show()
+    for omega in OMEGA:
+        hyperbole(omega)
+
+    plt.xlabel(r"$u_1, cm^{-1}$")
+    plt.ylabel(r"$u_2, cm^{-1}$")
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    plot()
+
