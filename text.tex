@@ -283,10 +283,10 @@
 \begin{array}{l}
     E_1\left(\frac{1}{g_1^2} h \frac{\pi n}{b}\sin u_1 (c-a) -
     \frac{1}{g_2^2}h \frac{\pi n}{b}\sin u_1(c-a)\right) =
-    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2H_1\cos u_1 (c-a) \tg u_2 c-
+    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2\cos u_1 (c-a) \tg u_2 c-
     \frac{1}{g_1^2}\omega\mu_1u_1\sin u_1 (c-a)\right);\\
     E_1\left(\frac{1}{g_1^2}\omega\eps_1u_1\cos u_1 (c-a)-
-    \frac{1}{g_2^2}\omega\eps_2u_2E_1\sin u_1(c-a)\ctg u_2 c\right)=
+    \frac{1}{g_2^2}\omega\eps_2u_2\sin u_1(c-a)\ctg u_2 c\right)=
     H_1\left(\frac{1}{g_1^2}h \frac{\pi n}{b} \cos u_1 (c-a)-
     \frac{1}{g_2^2}h \frac{\pi n}{b} \cos u_1 (c-a)\right)
 \end{array}
@@ -393,7 +393,7 @@
 Таким образом, система имеет решение при выполнении какого-либо из условий
 \[
     \frac{\tg u_2 c}{\tg u_1 (c-a)} =
-    \frac{u_2}{u_1},\quad
+    \frac{\mu_1}{\mu_2}\frac{u_2}{u_1},\quad
     \frac{\tg u_2 c}{\tg u_1 (c-a)} =
     \frac{\eps_2}{\eps_1}\frac{u_1}{u_2}.
 \]
@@ -401,10 +401,66 @@
 \[
     \left[
         \begin{array}{l}
-            \frac{\tg u_1 (a-c)}{u_1} + \frac{\tg u_2 c}{u_2} = 0,\\
+            \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,\\
             \frac{u_1\tg u_1 (a-c)}{\eps_1} + \frac{u_2\tg u_2 c}{\eps_2} = 0.
         \end{array}
     \right.
+\]
+
+Теперь выразим все компоненты через \( E_1 \):
+В случае
+\[
+    \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,
+\]
+имеем
+\[
+    E_1\left(\frac{1}{g_1^2} h \frac{\pi n}{b}-
+    \frac{1}{g_2^2}h \frac{\pi n}{b}\right) =
+    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2\frac{\tg u_2 c}{\tg u_1 (c-a)}-
+    \frac{1}{g_1^2}\omega\mu_1u_1\right),
+\]
+\[
+    E_1\frac{h\pi n}{b}\left(\frac{1}{g_1^2}-\frac{1}{g_2^2}\right)=
+    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2\frac{\mu_1u_2}{\mu_2u_1}-
+    \frac{1}{g_1^2}\omega\mu_1u_1\right),
+\]
+\[
+    H_1 = E_1\frac{u_1h\pi n}{\mu_1\omega b}
+    \frac{g_2^2-g_1^2}{g_1^2u_2^2 - g_2^2u_1^2} =
+    E_1\frac{u_1hb}{\mu_1\omega\pi n},
+\]
+\[
+    E_2 = E_1\frac{\sin u_1(c-a)}{\sin u_2 c},
+\]
+\[
+    H_2 = H_1 \frac{\cos u_1(c-a)}{\cos u_2 c} =
+    E_1\frac{u_1hb}{\mu_1\omega\pi n}\frac{\tg u_2c}{\tg u_1(c-a)}
+    \frac{\sin u_1(c-a)}{\sin u_2 c} = E_1\frac{u_2hb}{\mu_2\omega\pi n}
+    \frac{\sin u_1(c-a)}{\sin u_2 c}.
+\]
+А в случае
+\[
+    \frac{u_1\tg u_1 (a-c)}{\eps_1} + \frac{u_2\tg u_2 c}{\eps_2} = 0,
+\]
+имеем
+\[
+    E_1\frac{h\pi n}{b}\left(\frac{1}{g_1^2}-\frac{1}{g_2^2}\right)=
+    H_1\left(\frac{1}{g_2^2}\omega\mu_2u_2\frac{u_1\eps_2}{u_2\eps_1}-
+    \frac{1}{g_1^2}\omega\mu_1u_1\right),
+\]
+\[
+    H_1 = E_1\frac{\eps_1h\pi n}{u_1\omega b}
+    \frac{g_2^2-g_1^2}{g_1^2\eps_2\mu_2 - g_2^2\eps_1\mu_1} =
+    -E_1\frac{\eps_1\omega\pi n}{u_1hb},
+\]
+\[
+    E_2 = E_1\frac{\sin u_1(c-a)}{\sin u_2 c},
+\]
+\[
+    H_2 = H_1 \frac{\cos u_1(c-a)}{\cos u_2 c} =
+    -E_1\frac{\eps_1\omega\pi n}{u_1hb}\frac{\tg u_2c}{\tg u_1(c-a)}
+    \frac{\sin u_1(c-a)}{\sin u_2 c} = -E_1\frac{\eps_2\omega\pi n}{u_2hb}
+    \frac{\sin u_1(c-a)}{\sin u_2 c}.
 \]
 \end{document}
 
