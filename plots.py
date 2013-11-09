@@ -49,7 +49,7 @@ def bisection(f, left, right):
             return bisection(f, center, right)
 
 
-def solution(condition, n1, n2):
+def curve(condition, n1, n2):
     delta = 0.005
 
     # границы области, в которой ищется решение
@@ -74,23 +74,51 @@ def wavenumbers_relationship(omega):
     U2 = list(map(u2, U1))
     plt.plot(U1, U2, "k--")
 
+def solution(U1, U2, omega):
+    """
+    Бинарный поиск (цикл)
+    Условие на входные данные:
+        * U1 и U2 -- списки
+        * len(U1) == len(U2)
+    """
+    test = lambda j: (U1[j] ** 2 - U2[j] ** 2 -\
+                    omega ** 2 / c ** 2 * (e1 * m1 - e2 * m2))
+    left = 0
+    right = len(U1) - 1
+    result = False
+    while test(left) * test(right) <= 0:
+        center = int((left + right) / 2)
+        if test(left) * test(center) <= 0:
+            right = center
+        elif center == left:
+            if abs(test(left)) < abs(test(right)):
+                result = (U1[left], U2[left])
+                break
+            else:
+                result = (U1[right], U2[right])
+                break
+        else:
+            left = center
+    return result
 
 def plot(condition):
     for i in range(9):
         n = 2 * i + 1
-        for i in range(n+1):
-            u1, u2 = solution(condition, i, n - i)
-            plt.plot(u1, u2, "k-")
+        for j in range(n+1):
+            U1, U2 = curve(condition, j, n - j)
             # нарисуем границы прямоугольников
-            left = i * pi / 2.0 / l1
-            right = (i + 1) * pi / 2.0 / l1
-            bottom = (n - i) * pi / 2.0 / l2
-            top = (n - i + 1) * pi / 2.0 / l2
+            left = j * pi / 2.0 / l1
+            right = (j + 1) * pi / 2.0 / l1
+            bottom = (n - j) * pi / 2.0 / l2
+            top = (n - j + 1) * pi / 2.0 / l2
             plt.plot([right, left, left, right, right],
                     [bottom, bottom, top, top, bottom], "k:")
+            plt.plot(U1, U2, "k-")
 
-    for omega in OMEGA:
-        wavenumbers_relationship(omega)
+            for omega in OMEGA:
+                point = solution(U1, U2, omega)
+                if point:
+                    plt.plot([point[0]], [point[1]], "ro")
 
     plt.xlabel(r"$u_1, cm^{-1}$")
     plt.ylabel(r"$u_2, cm^{-1}$")
