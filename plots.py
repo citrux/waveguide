@@ -10,7 +10,7 @@ import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 
-from math import pi, tan
+from math import pi, tan, log
 
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
@@ -28,11 +28,10 @@ def e_condition(u1, u2):
 def m_condition(u1, u2):
     return m1 * tan(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
 
-def bisection(f, left, right):
+def bisection(f, left, right, precision=5e-3):
     """
     Метод бисекции поиска корня (трансцендентного) уравнения
     """
-    precision = 0.005
     center = (left + right) / 2.0
     if right-left < precision:
         return center
@@ -68,38 +67,54 @@ def curve(condition, n1, n2):
     return x, y
 
 
-def wavenumbers_relationship(omega):
+def plot_wavenumbers_relationship(omega):
     U1 = np.linspace(0, 7, 100)
     u2 = lambda u1: ((e2 * m2 - e1 * m1) * omega ** 2 / c ** 2 + u1 ** 2) ** 0.5
     U2 = list(map(u2, U1))
     plt.plot(U1, U2, "k--")
 
-def solution(U1, U2, omega):
-    """
-    Бинарный поиск (цикл)
-    Условие на входные данные:
-        * U1 и U2 -- списки
-        * len(U1) == len(U2)
-    """
-    test = lambda j: (U1[j] ** 2 - U2[j] ** 2 -\
+
+def solution(condition, n1, n2, omega, delta=1e-4):
+    test = lambda u1, u2: (u1 ** 2 - u2 ** 2 -\
                     omega ** 2 / c ** 2 * (e1 * m1 - e2 * m2))
-    left = 0
-    right = len(U1) - 1
+    # u1
+    left = n1 * pi / 2.0 / l1 + delta
+    right = (n1 + 1) * pi / 2.0 / l1 - delta
+    # u2
+    bottom = n2 * pi / 2.0 / l2 + delta ** 2    # немного магии: из-за "плохих"
+    top = (n2 + 1) * pi / 2.0 / l2 - delta ** 2 # производных приходится ставить
+                                                # разные границы
+    u2 = lambda u1: bisection(lambda u2: condition(u1, u2), bottom, top, delta)
     result = False
-    while test(left) * test(right) <= 0:
-        center = int((left + right) / 2)
-        if test(left) * test(center) <= 0:
+    sleft = u2(left)
+    sright = u2(right)
+
+    #print(test(left, sleft) * test(right, sright))
+    while test(left, sleft) * test(right, sright) <= 0:
+        #print(left, right, sleft, sright)
+        center = (left + right) / 2.0
+        if test(left, sleft) * test(center, u2(center)) <= 0:
             right = center
-        elif center == left:
-            if abs(test(left)) < abs(test(right)):
-                result = (U1[left], U2[left])
+            sright = u2(center)
+        elif (right-left) <= delta:
+            if abs(test(left, sleft)) < abs(test(right, sright)):
+                result = (left, sleft)
                 break
             else:
-                result = (U1[right], U2[right])
+                result = (right, sright)
                 break
         else:
             left = center
+            sleft = u2(center)
     return result
+
+def solve(condition, n1, n2, omega, delta):
+    a = solution(condition, n1, n2, omega, delta)
+    u1, u2 = a
+    n = -log(delta) / log(10)
+    u1 = round(u1 * 10 ** n) * 10 ** -n
+    u2 = round(u2 * 10 ** n) * 10 ** -n
+    return u1, u2
 
 def plot(condition):
     for i in range(9):
@@ -137,6 +152,13 @@ def plot(condition):
 
 
 if __name__ == '__main__':
-    plot(e_condition)
-    plot(m_condition)
+    #plot(e_condition)
+    #plot(m_condition)
+    u1, u2 = solve(e_condition, 0, 1, 2e10, 1e-6)
+    print(u1, u2)
+    u1, u2 = solve(e_condition, 2, 1, 2e10, 1e-6)
+    print(u1, u2)
+    u1, u2 = solve(e_condition, 3, 2, 2e10, 1e-6)
+    print(u1, u2)
+
 
