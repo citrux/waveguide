@@ -37,10 +37,10 @@ def bisection(f, left, right, precision=5e-3):
         return center
     elif f(left) * f(right) > 0:
         return False
-    elif abs(f(left)) < precision:
-        return left
-    elif abs(f(right)) < precision:
-        return right
+    #elif abs(f(left)) < precision:
+        #return left
+    #elif abs(f(right)) < precision:
+        #return right
     else:
         if f(center) * f(left) <= 0:
             return bisection(f, left, center)
@@ -67,11 +67,11 @@ def curve(condition, n1, n2):
     return x, y
 
 
-def plot_wavenumbers_relationship(omega):
-    U1 = np.linspace(0, 7, 100)
+def plot_wavenumbers_relationship(omega, color="k", right=7):
+    U1 = np.linspace(0, right, 100)
     u2 = lambda u1: ((e2 * m2 - e1 * m1) * omega ** 2 / c ** 2 + u1 ** 2) ** 0.5
     U2 = list(map(u2, U1))
-    plt.plot(U1, U2, "k--")
+    plt.plot(U1, U2, "%s-" % color)
 
 
 def solution(condition, n1, n2, omega, delta=1e-4):
@@ -108,16 +108,25 @@ def solution(condition, n1, n2, omega, delta=1e-4):
             sleft = u2(center)
     return result
 
-def solve(condition, n1, n2, omega, delta):
-    a = solution(condition, n1, n2, omega, delta)
-    u1, u2 = a
-    n = -log(delta) / log(10)
-    u1 = round(u1 * 10 ** n) * 10 ** -n
-    u2 = round(u2 * 10 ** n) * 10 ** -n
-    return u1, u2
+def transversal_wavenumbers(condition, n, omega, delta):
+    for i in range(2*n):
+        a = solution(condition, i, 2*n - 1 - i, omega, delta)
+        if a:
+            u1, u2 = a
+            b = -log(delta) / log(10)
+            u1 = round(u1 * 10 ** b) * 10 ** -b
+            u2 = round(u2 * 10 ** b) * 10 ** -b
+            return u1, u2
+    return False, False
 
-def plot(condition):
-    for i in range(9):
+def plot_transversal(condition):
+    m = 3
+    k = 0
+    color = ["r", "y", "g", "c", "b", "m"]
+    for omega in OMEGA:
+        plot_wavenumbers_relationship(omega, color[k], (m + 1) * pi / 2.0 / l1)
+        k += 1
+    for i in range(m):
         n = 2 * i + 1
         for j in range(n+1):
             U1, U2 = curve(condition, j, n - j)
@@ -130,10 +139,9 @@ def plot(condition):
                     [bottom, bottom, top, top, bottom], "k:")
             plt.plot(U1, U2, "k-")
 
-            for omega in OMEGA:
-                point = solution(U1, U2, omega)
-                if point:
-                    plt.plot([point[0]], [point[1]], "ro")
+        for omega in OMEGA:
+            u1, u2 = transversal_wavenumbers(condition, i + 1, omega, 1e-7)
+            plt.plot([u1], [u2], "ro")
 
     plt.xlabel(r"$u_1, cm^{-1}$")
     plt.ylabel(r"$u_2, cm^{-1}$")
@@ -151,14 +159,38 @@ def plot(condition):
     plt.cla()
 
 
+def longitudinal_wavenumber(condition, n):
+    H, O = [], []
+    for omega in np.linspace(2e10, 6e10, 100):
+        u1, u2 = transversal_wavenumbers(condition, n, omega, 1e-7)
+        if u1 and u2 and (omega/c * (e1 * m1) ** 0.5 > u1):
+            O.append(omega)
+            H.append((omega ** 2 / c**2 * e1 * m1 - u1 ** 2) ** 0.5)
+    return O, H
+
+def plot_longitudinal(condition, N):
+    for i in N:
+        O, H = longitudinal_wavenumber(condition, i)
+        plt.plot(O, H, "k-")
+
+    plt.xlabel(r"$\omega, rad/s$")
+    plt.ylabel(r"$h, cm^{-1}$")
+    if DEBUG:
+        plt.show()
+    else:
+        if condition is e_condition:
+            name = "e_h"
+        elif condition is m_condition:
+            name = "m_h"
+        else:
+            name = "wtf"
+        plt.savefig(name + ".png")
+    plt.cla()
+
 if __name__ == '__main__':
-    #plot(e_condition)
-    #plot(m_condition)
-    u1, u2 = solve(e_condition, 0, 1, 2e10, 1e-6)
-    print(u1, u2)
-    u1, u2 = solve(e_condition, 2, 1, 2e10, 1e-6)
-    print(u1, u2)
-    u1, u2 = solve(e_condition, 3, 2, 2e10, 1e-6)
-    print(u1, u2)
+    plot_longitudinal(e_condition, [1,2,3])
+    plot_longitudinal(m_condition, [2,3])
+
+
 
 
