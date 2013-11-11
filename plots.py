@@ -17,6 +17,7 @@ plt.rc('font', family='serif')
 
 e1, m1, l1 = 1.0, 1.0, 3.5
 e2, m2, l2 = 5.0, 1.0, 1.5
+b = 3.0
 # скорость света, см/с
 c = 3e10
 # частоты (СВЧ 3 ÷ 30 ГГц) → omega = 20 ÷ 200 Град/с
@@ -37,10 +38,6 @@ def bisection(f, left, right, precision=5e-3):
         return center
     elif f(left) * f(right) > 0:
         return False
-    #elif abs(f(left)) < precision:
-        #return left
-    #elif abs(f(right)) < precision:
-        #return right
     else:
         if f(center) * f(left) <= 0:
             return bisection(f, left, center)
@@ -159,18 +156,19 @@ def plot_transversal(condition):
     plt.cla()
 
 
-def longitudinal_wavenumber(condition, n):
+def longitudinal_wavenumber(condition, n, k):
     H, O = [], []
     for omega in np.linspace(2e10, 6e10, 100):
-        u1, u2 = transversal_wavenumbers(condition, n, omega, 1e-7)
-        if u1 and u2 and (omega/c * (e1 * m1) ** 0.5 > u1):
+        u1, u2 = transversal_wavenumbers(condition, k, omega, 1e-7)
+        sqr_h = omega ** 2 / c ** 2 * (e1 * m1) - u1 ** 2 - (pi * n / b) ** 2
+        if u1 and u2 and sqr_h > 0:
             O.append(omega)
-            H.append((omega ** 2 / c**2 * e1 * m1 - u1 ** 2) ** 0.5)
+            H.append(sqr_h ** 0.5)
     return O, H
 
-def plot_longitudinal(condition, N):
+def plot_longitudinal(condition, n, N):
     for i in N:
-        O, H = longitudinal_wavenumber(condition, i)
+        O, H = longitudinal_wavenumber(condition, n, i)
         plt.plot(O, H, "k-")
 
     plt.xlabel(r"$\omega, rad/s$")
@@ -188,9 +186,6 @@ def plot_longitudinal(condition, N):
     plt.cla()
 
 if __name__ == '__main__':
-    plot_longitudinal(e_condition, [1,2,3])
-    plot_longitudinal(m_condition, [2,3])
-
-
-
+    plot_longitudinal(e_condition, 1, [1,2,3])
+    plot_longitudinal(m_condition, 1, [2,3])
 
