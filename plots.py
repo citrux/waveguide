@@ -186,6 +186,8 @@ def plot_longitudinal(condition, n, N):
     plt.cla()
 
 if __name__ == '__main__':
+    plot_transversal(e_condition)
+    plot_transversal(m_condition)
     plot_longitudinal(e_condition, 1, [1,2,3])
     plot_longitudinal(m_condition, 1, [2,3])
 
