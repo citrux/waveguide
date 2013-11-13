@@ -54,8 +54,8 @@ double bisection(F f, double left, double right, double precision=5e-3)
     return bisection(f, center, right);
 }
 
-template <typename F>
-std::vector<std::vector<double>> curve(F condition, int n,
+
+std::vector<std::vector<double>> curve(std::string condition, int n,
         double precision=5e-3)
 {
     int m = 2 * n - 1;
@@ -72,9 +72,12 @@ std::vector<std::vector<double>> curve(F condition, int n,
         n2 = m - n1;
         double bottom = n2 * pi / 2.0 / l2;
         double top = (n2 + 1) * pi / 2.0 / l2;
-        u2 = bisection([u1, condition](double u2) -> double
+        u2 = bisection([u1, condition](double u2)
+                -> double
                 {
-                    return condition(u1, u2);
+                    if (condition == "e") { return e_condition(u1, u2);};
+                    if (condition == "m") { return m_condition(u1, u2);};
+                    return u1 + u2; // for amazing results
                 },
                 bottom + precision, top - precision);
         if (u2)
@@ -89,9 +92,9 @@ std::vector<std::vector<double>> curve(F condition, int n,
     return result;
 }
 
-void plot(mglGraph *gr, int n)
+void plot(mglGraph *gr, std::string condition, int number)
 {
-    auto X = curve(e_condition, n);
+    auto X = curve(condition, number);
     mglData x;
     mglData y;
     x.Set(X[0]);  // convert to internal format
@@ -99,24 +102,26 @@ void plot(mglGraph *gr, int n)
     gr->Plot(x,y,"k");   // plot it
 }
 
-void plot_transversal_wavenumbers()
+void plot_transversal_wavenumbers(std::string condition, const int number)
 {
-    const int n = 4;
     mglGraph gr; // create canvas
-    gr.SetRanges(0, n * pi / l1 , 0, n * pi / l2);
-    for (int i = 1; i <= n; i++) {
-        plot(&gr,i);
+    gr.SetRanges(0, number * pi / l1 , 0, number * pi / l2);
+    for (int i = 1; i <= number; i++) {
+        plot(&gr, condition, i);
     }
     gr.Axis();
     gr.Label('x', "u_1, cm^{-1}", 0);
     gr.Label('y', "u_2, cm^{-1}", 0);
-    gr.Grid("k:");
-    gr.WriteFrame("1.eps"); // save it
+    gr.Grid("k");
+
+    auto name = condition + ".eps";
+    gr.WriteFrame(name.c_str()); // save it
 }
 
 int main(int argc, const char *argv[])
 {
-    plot_transversal_wavenumbers();
+    plot_transversal_wavenumbers("e", 5);
+    plot_transversal_wavenumbers("m", 5);
     return 0;
 }
 
