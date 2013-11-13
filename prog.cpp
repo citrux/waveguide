@@ -1,3 +1,4 @@
+#include <mgl2/mgl.h>
 #include <cmath>
 #include <iostream>
 
@@ -54,57 +55,68 @@ double bisection(F f, double left, double right, double precision=5e-3)
 }
 
 template <typename F>
-std::vector<std::vector<double>> curve(F condition, int n1, int n2,
+std::vector<std::vector<double>> curve(F condition, int n,
         double precision=5e-3)
 {
-    // границы области, в которой ищется решение
-    double left = n1 * pi / 2.0 / l1;
-    double right = (n1 + 1) * pi / 2.0 / l1;
-    double bottom = n2 * pi / 2.0 / l2;
-    double top = (n2 + 1) * pi / 2.0 / l2;
-
-    const int count = (right - left) / precision - 2;
+    int m = 2 * n - 1;
+    int n1, n2;
+    double right = (m + 1) * pi / 2.0 / l1;
 
     std::vector<double> U1;
     std::vector<double> U2;
-    std::vector<double>::iterator i1;
     double u1, u2;
 
-    for (int i = 0; i < count; i++) {
-        U1.push_back(left + (i + 1) * precision);
-    }
-
-    i1 = U1.begin();
-    int index;
-    while (i1 != U1.end()) {
-        u2 = bisection([i1, condition](double u2) -> double
+    while (u1 < right)
+    {
+        n1 = (int) (2.0 * l1 * u1 / pi);
+        n2 = m - n1;
+        double bottom = n2 * pi / 2.0 / l2;
+        double top = (n2 + 1) * pi / 2.0 / l2;
+        u2 = bisection([u1, condition](double u2) -> double
                 {
-                    return condition(*i1, u2);
+                    return condition(u1, u2);
                 },
                 bottom + precision, top - precision);
         if (u2)
         {
-            if (VERBOSE_CURVE) {std::cout << *i1 << ", " << u2 << std::endl;}
+            if (VERBOSE_CURVE) {std::cout << u1 << ", " << u2 << std::endl;}
+            U1.push_back(u1);
             U2.push_back(u2);
-            ++i1;
         }
-        else
-        {
-            index = i1 - U1.begin();
-            U1.erase(i1);
-            std::vector<double>(U1).swap(U1);
-            i1 = U1.begin() + index;
-        }
+        u1 += precision;
     }
-
     std::vector<std::vector<double>>result = {U1, U2};
     return result;
 }
 
-
-int main()
+void plot(mglGraph *gr, int n)
 {
-    auto x = curve(e_condition, 0, 1);
-    std::cout << x[0].size() << ", " << x[1].size() << std::endl;
+    auto X = curve(e_condition, n);
+    mglData x;
+    mglData y;
+    x.Set(X[0]);  // convert to internal format
+    y.Set(X[1]);  // convert to internal format
+    gr->Plot(x,y,"k");   // plot it
+}
+
+void plot_transversal_wavenumbers()
+{
+    const int n = 4;
+    mglGraph gr; // create canvas
+    gr.SetRanges(0, n * pi / l1 , 0, n * pi / l2);
+    for (int i = 1; i <= n; i++) {
+        plot(&gr,i);
+    }
+    gr.Axis();
+    gr.Label('x', "u_1, cm^{-1}", 0);
+    gr.Label('y', "u_2, cm^{-1}", 0);
+    gr.Grid("k:");
+    gr.WriteFrame("1.eps"); // save it
+}
+
+int main(int argc, const char *argv[])
+{
+    plot_transversal_wavenumbers();
     return 0;
 }
+
