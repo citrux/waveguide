@@ -3,7 +3,7 @@
 #include <iostream>
 
 bool VERBOSE_BISECTION = false;
-bool VERBOSE_CURVE = false;
+bool VERBOSE_curves = false;
 
 const double e1 = 1.0;
 const double m1 = 1.0;
@@ -30,6 +30,11 @@ double m_condition(double u1, double u2)
     return m1 * std::tan(u1 * l1) / u1 + m2 * std::tan(u2 * l2) / u2;
 }
 
+double transversal_wavenumbers_relationship(double omega, double u1, double u2)
+{
+    return pow(omega/c, 2)*(e1 * m1 - e2 * m2) - (pow(u1,2) - pow(u2,2));
+}
+
 template <typename F>
 double bisection(F f, double left, double right, double precision=5e-3)
 {
@@ -54,13 +59,28 @@ double bisection(F f, double left, double right, double precision=5e-3)
     return bisection(f, center, right);
 }
 
-
-std::vector<std::vector<double>> curve(std::string condition, int n,
+double second_from_first(std::string condition, double u1, int number,
         double precision=5e-3)
 {
-    int m = 2 * n - 1;
-    int n1, n2;
-    double right = (m + 1) * pi / 2.0 / l1;
+    double n1 = (int) (2.0 * l1 * u1 / pi);
+    double n2 = 2 * number - 1 - n1;
+    double bottom = n2 * pi / 2.0 / l2;
+    double top = (n2 + 1) * pi / 2.0 / l2;
+    double u2 = bisection([u1, condition](double u2)
+            -> double
+            {
+                if (condition == "e") { return e_condition(u1, u2);};
+                if (condition == "m") { return m_condition(u1, u2);};
+                return u1 + u2; // for amazing results
+            },
+            bottom + precision, top - precision);
+    return u2;
+}
+
+std::vector<std::vector<double>> curves(std::string condition,
+        int n, double precision=5e-3)
+{
+    double right = n * pi / l1;
 
     std::vector<double> U1;
     std::vector<double> U2;
@@ -68,21 +88,10 @@ std::vector<std::vector<double>> curve(std::string condition, int n,
 
     while (u1 < right)
     {
-        n1 = (int) (2.0 * l1 * u1 / pi);
-        n2 = m - n1;
-        double bottom = n2 * pi / 2.0 / l2;
-        double top = (n2 + 1) * pi / 2.0 / l2;
-        u2 = bisection([u1, condition](double u2)
-                -> double
-                {
-                    if (condition == "e") { return e_condition(u1, u2);};
-                    if (condition == "m") { return m_condition(u1, u2);};
-                    return u1 + u2; // for amazing results
-                },
-                bottom + precision, top - precision);
+        u2 = second_from_first(condition, u1, n);
         if (u2)
         {
-            if (VERBOSE_CURVE) {std::cout << u1 << ", " << u2 << std::endl;}
+            if (VERBOSE_curves) {std::cout << u1 << ", " << u2 << std::endl;}
             U1.push_back(u1);
             U2.push_back(u2);
         }
@@ -92,22 +101,82 @@ std::vector<std::vector<double>> curve(std::string condition, int n,
     return result;
 }
 
-void plot(mglGraph *gr, std::string condition, int number)
+std::pair<double, double> transversal_wavenumbers(std::string condition,
+        int number, double omega, double precision=1e-5)
 {
-    auto X = curve(condition, number);
-    mglData x;
-    mglData y;
-    x.Set(X[0]);  // convert to internal format
-    y.Set(X[1]);  // convert to internal format
-    gr->Plot(x,y,"k");   // plot it
+    int m = 2 * number - 1;
+    double f_left = 0;
+    double f_right = (m + 1) * pi / 2.0 / l1;
+    double f_center = (f_left + f_right) / 2.0;
+    double s_left, s_center, s_right;
+    double left, right, center;
+    double u1, u2;
+
+    while (f_right - f_left > precision)
+    {
+        f_center = (right + left) / 2.0;
+        s_left = second_from_first(condition, left, number);
+        s_right = second_from_first(condition, right, number);
+        s_center = second_from_first(condition, center, number);
+
+        left = transversal_wavenumbers_relationship(omega, f_left, s_left);
+        right = transversal_wavenumbers_relationship(omega, f_right, s_right);
+        center = transversal_wavenumbers_relationship(omega, f_center, s_center);
+
+        if (left * right > 0)
+        {
+            std::cout << "something went wrong…" << std::endl;
+            break;
+        }
+        if (left * center < 0) { f_right = f_center; }
+        else { f_left = f_center; }
+    }
+    std::pair<double, double>result = {f_center, s_center};
+    return result;
 }
 
-void plot_transversal_wavenumbers(std::string condition, const int number)
+std::vector<std::vector<double>> longitudinal_wavenumber(std::string condition,
+        int n, int k)
+{
+    std::vector<double> H, O;
+    double omega = 2e10;
+    double sqr_h, u1, u2;
+    std::pair<double,double> tw;
+    while (omega < 6e10)
+    {
+        tw = transversal_wavenumbers(condition, k, omega, 1e-7);
+        u1 = tw.first; u2 = tw.second;
+        sqr_h = pow(omega / c, 2) * (e1 * m1) - u1 * u1 -
+        pow((pi * n / b), 2);
+        if (u1 && u2 && (sqr_h > 0))
+        {
+            O.push_back(omega);
+            H.push_back(sqrt(sqr_h));
+        }
+        omega +=1e9;
+    }
+    std::vector<std::vector<double>> result;
+    result = {O, H};
+    return result;
+}
+
+void plot(mglGraph *gr, std::string condition,
+        std::vector<double> x, std::vector<double> y)
+{
+    mglData X;
+    mglData Y;
+    X.Set(x);  // convert to internal format
+    Y.Set(y);  // convert to internal format
+    gr->Plot(X, Y, "k");   // plot it
+}
+
+void plot_curves(std::string condition, const int number)
 {
     mglGraph gr; // create canvas
     gr.SetRanges(0, number * pi / l1 , 0, number * pi / l2);
     for (int i = 1; i <= number; i++) {
-        plot(&gr, condition, i);
+        auto data = curves(condition, i);
+        plot(&gr, condition, data[0], data[1]);
     }
     gr.Axis();
     gr.Label('x', "u_1, cm^{-1}", 0);
@@ -118,10 +187,32 @@ void plot_transversal_wavenumbers(std::string condition, const int number)
     gr.WriteFrame(name.c_str()); // save it
 }
 
+void plot_longitudinal(std::string condition, int n, std::vector<int>N)
+{
+    mglGraph gr; // create canvas
+    gr.SetRanges(0, 6e10 , 0, 2);
+    for (int i=0; i<N.size(); ++i)
+    {
+        auto data = longitudinal_wavenumber(condition, 1, N[i]);
+        plot(&gr, condition, data[0], data[1]);
+    }
+    gr.Axis();
+    gr.Label('x', "\\omega, rad/s}", 0);
+    gr.Label('y', "h, cm^{-1}", 0);
+    gr.Grid("k");
+
+    auto name = condition + "_h.eps";
+    gr.WriteFrame(name.c_str()); // save it
+}
+
+
+
 int main(int argc, const char *argv[])
 {
-    plot_transversal_wavenumbers("e", 5);
-    plot_transversal_wavenumbers("m", 5);
+    plot_curves("e", 5);
+    plot_curves("m", 5);
+    plot_longitudinal("e", 1, {1,2,3});
+    plot_longitudinal("m", 1, {1,2,3});
     return 0;
 }
 
