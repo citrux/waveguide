@@ -1,7 +1,7 @@
 CC=g++
 CFLAGS=-std=c++11 -lmgl
-SRC=prog.cpp
-NAME=prog
+SRC=dispersion_relation.cpp
+NAME=dispersion_relation
 
 happy:
 	$(CC) $(CFLAGS) $(SRC) -o $(NAME)

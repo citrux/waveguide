@@ -44,7 +44,7 @@ double m_condition(double u1, double u2)
     return m1 * std::tan(u1 * l1) / u1 + m2 * std::tan(u2 * l2) / u2;
 }
 
-double transversal_wavenumbers_relationship(double omega, double u1, double u2)
+double transversal_wavenumbers_relation(double omega, double u1, double u2)
 {
     return pow(omega/c, 2)*(e1 * m1 - e2 * m2) - (pow(u1,2) - pow(u2,2));
 }
@@ -140,7 +140,7 @@ std::pair<double, double> transversal_wavenumbers(std::string condition,
             -> double
             {
                 double u2 = second_from_first(condition, u1, number);
-                return transversal_wavenumbers_relationship(omega, u1, u2);
+                return transversal_wavenumbers_relation(omega, u1, u2);
             },
             left + precision, right - precision);
 
@@ -202,7 +202,7 @@ void plot_curves(std::string condition, const int number)
     gr.WriteFrame(name.c_str()); // save it
 }
 
-void plot_longitudinal(std::string condition, int n, std::vector<int>N)
+void plot_dispersion_relation(std::string condition, int n, std::vector<int>N)
 {
     mglGraph gr; // create canvas
     gr.SetRanges(0, 6e10 , 0, 2);
@@ -225,8 +225,8 @@ int main(int argc, const char *argv[])
 {
     plot_curves("e", 5);
     plot_curves("m", 5);
-    plot_longitudinal("e", 1, {1,2,3});
-    plot_longitudinal("m", 1, {1,2,3});
+    plot_dispersion_relation("e", 1, {1,2,3});
+    plot_dispersion_relation("m", 1, {1,2,3});
     return 0;
 }
 
