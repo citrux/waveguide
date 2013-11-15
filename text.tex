@@ -1,11 +1,13 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper]{hedsemwork}
 \usepackage[utf8]{inputenc}
 \usepackage[russian]{babel}
-\usepackage[margin=2cm]{geometry}
+%\usepackage[margin=2cm]{geometry}
+\usepackage{graphicx}
 \usepackage[vectors,derivative]{hedmaths}
 \renewcommand{\arraystretch}{2}
 \renewcommand{\frac}{\dfrac}
 \begin{document}
+\section{Связь компонент поля в волноводе}
     Запишем пару уравнений Максвелла для электромагнитного поля:
     \[
         \left\{
@@ -84,7 +86,8 @@
     \[
         \Delta_\perp \vec{H}(x,y) + g^2\vec{H}(x,y) = 0.
     \]
-    А теперь к задаче.
+
+\section{Волны в волноводе с неоднородным заполнением}
 
     Рассмотрим быстрые волны, распространяющиеся в двух частях волновода.
     Запишем уравнения:
@@ -505,5 +508,24 @@
 \[
     H_2 = H_1\frac{\cos u_1 (c-a)}{\cos u_2 c},
 \]
+
+\section{Решение дисперсионного уравнения}
+Ранее были получены 2 дисперсионных уравнения, которые, однако, не позволяют
+определить поперечные волновые числа \( u_1 \) и \( u_2 \). Для их определения
+нужно ещё одно условие. Получим его:
+\[
+    u_i^2 = \beta_i^2 - h^2 - \frac{\pi n}{b},
+\]
+\[
+    u_2^2 - u_1^2 = \beta_2^2 - \beta_1^2 = \omega^2(\eps_2\mu_2 - \eps_1\mu_1).
+\]
+\begin{figure}
+    \includegraphics[width=\textwidth]{e.pdf}
+    \caption{\( \eps \)-условие}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{m.pdf}
+    \caption{\( \mu \)-условие}
+\end{figure}
 \end{document}
 
