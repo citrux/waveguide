@@ -462,5 +462,48 @@
     \frac{\sin u_1(c-a)}{\sin u_2 c} = -E_1\frac{\eps_2\omega\pi n}{u_2hb}
     \frac{\sin u_1(c-a)}{\sin u_2 c}.
 \]
+
+Указанные выше выражения получены при условии \( n \neq 0 \). При \( n = 0 \)
+имеем \( E_{z1} = E_{z2} = 0 \)
+\[
+    \left\{
+    \begin{array}{l}
+        E_{1x} = 0, \\
+        H_{1x} = \frac{i e^{i(\omega t - h z)}}{g_1^2}
+        h u_1 H_1 \sin u_1 (x-a),\\
+        E_{1y} = -\frac{i e^{i(\omega t - h z)}}{g_1^2}
+        \omega\mu_1u_1H_1 \sin u_1 (x-a),\\
+        H_{1y} = 0,\\
+        E_{2x} = 0,\\
+        H_{2x} = \frac{i e^{i(\omega t - h z)}}{g_2^2}
+        h u_2 H_2 \sin u_2 x,\\
+        E_{2y} = -\frac{i e^{i(\omega t - h z)}}{g_2^2}
+        \omega\mu_2u_2H_2 \sin u_2 x,\\
+        H_{2y} = 0.
+    \end{array}
+    \right.
+\]
+Тогда граничные условия записываются в виде:
+\[
+\begin{array}{cl}
+    E_{y1} = E_{y2}: &
+    \frac{1}{g_1^2}  \omega\mu_1u_1H_1 \sin u_1 (c-a) =
+    \frac{1}{g_2^2}  \omega\mu_2u_2H_2 \sin u_2 c ;\\
+    H_{z1} = H_{z2}: & H_1\cos u_1 (c-a) = H_2\cos u_2 c.\\
+\end{array}
+\]
+\[
+    \frac{1}{g_1^2} \mu_1 u_1 \tg u_1 (c-a) = \frac{g_2^2} \mu_2 u_2 \tg u_2 c.
+\]
+При \( n=0 \) \( g_i = u_i \), откуда получаем дисперсионное уравнение
+\[
+    \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,
+\]
+что совпадает с одним из условий \( n \neq 0 \).
+В полученной \( H \)-волне определим соотношение между амплитудами магнитного
+поля
+\[
+    H_2 = H_1\frac{\cos u_1 (c-a)}{\cos u_2 c},
+\]
 \end{document}
 
