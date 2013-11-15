@@ -4,3 +4,5 @@
 
 [pdf-отчёт](https://db.tt/rUbXbCoD)
 
+![scheme](https://f.cloud.github.com/assets/864549/1552319/5eb47dc4-4e22-11e3-8b59-571b615c01e5.png)
+
