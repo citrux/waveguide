@@ -29,7 +29,8 @@ const double b = 3.0;
 const double c = 3e10;
 // число π
 const double pi = std::acos(-1);
-
+// отступ на границе области поиска для конечности тангенса
+const double margin = 1e-5;
 
 /******************************************************************************
  *                           Дисперсионные уравнения
@@ -94,7 +95,7 @@ double second_from_first(std::string condition, double u1, int number,
                 if (condition == "m") { return m_condition(u1, u2);};
                 return u1 + u2; // for amazing results
             },
-            bottom + precision, top - precision);
+            bottom + margin, top - margin);
     return u2;
 }
 
@@ -110,9 +111,10 @@ std::vector<std::vector<double>> curves(std::string condition, int number,
 
     std::vector<double> U1;
     std::vector<double> U2;
-    double u1, u2;
+    double u1 = right - margin;
+    double u2;
 
-    while (u1 < right)
+    while (u1 > 0)
     {
         u2 = second_from_first(condition, u1, number);
         if (u2)
@@ -121,7 +123,7 @@ std::vector<std::vector<double>> curves(std::string condition, int number,
             U1.push_back(u1);
             U2.push_back(u2);
         }
-        u1 += precision;
+        u1 -= precision;
     }
     std::vector<std::vector<double>>result = {U1, U2};
     return result;
@@ -142,7 +144,7 @@ std::pair<double, double> transversal_wavenumbers(std::string condition,
                 double u2 = second_from_first(condition, u1, number);
                 return transversal_wavenumbers_relation(omega, u1, u2);
             },
-            left + precision, right - precision);
+            left + margin, right - margin);
 
     u2 = second_from_first(condition, u1, number);
     std::pair<double, double>result = {u1, u2};
@@ -154,10 +156,10 @@ std::vector<std::vector<double>> longitudinal_wavenumber(std::string condition,
         int n, int k)
 {
     std::vector<double> H, O;
-    double omega = 2e10;
+    double omega = 3e10;
     double sqr_h, u1, u2;
     std::pair<double,double> tw;
-    while (omega < 6e10)
+    while (omega < 10e10)
     {
         tw = transversal_wavenumbers(condition, k, omega, 1e-7);
         u1 = tw.first; u2 = tw.second;
@@ -168,15 +170,14 @@ std::vector<std::vector<double>> longitudinal_wavenumber(std::string condition,
             O.push_back(omega);
             H.push_back(sqrt(sqr_h));
         }
-        omega +=1e9;
+        omega +=1e8;
     }
     std::vector<std::vector<double>> result;
     result = {O, H};
     return result;
 }
 
-void plot(mglGraph *gr, std::string condition,
-        std::vector<double> x, std::vector<double> y)
+void plot(mglGraph *gr, std::vector<double> x, std::vector<double> y)
 {
     mglData X;
     mglData Y;
@@ -185,13 +186,29 @@ void plot(mglGraph *gr, std::string condition,
     gr->Plot(X, Y, "k");   // plot it
 }
 
+void draw_point(mglGraph *gr, std::pair<double, double> point)
+{
+    mglData X, Y;
+    std::vector<double> x, y;
+    x.push_back(point.first);
+    y.push_back(point.second);
+    X.Set(x);  // convert to internal format
+    Y.Set(y);  // convert to internal format
+    gr->Plot(X, Y, "r3o");   // plot it
+}
+
 void plot_curves(std::string condition, const int number)
 {
     mglGraph gr; // create canvas
     gr.SetRanges(0, number * pi / l1 , 0, number * pi / l2);
+    double omega = 5e10;
     for (int i = 1; i <= number; i++) {
         auto data = curves(condition, i);
-        plot(&gr, condition, data[0], data[1]);
+        auto point = transversal_wavenumbers(condition, i, omega);
+        plot(&gr, data[0], data[1]);
+        draw_point(&gr, point);
+        std::cout << i << ", (" << point.first << ", " << point.second << ")"
+            << std::endl;
     }
     gr.Axis();
     gr.Label('x', "u_1, cm^{-1}", 0);
@@ -209,7 +226,7 @@ void plot_dispersion_relation(std::string condition, int n, std::vector<int>N)
     for (int i=0; i<N.size(); ++i)
     {
         auto data = longitudinal_wavenumber(condition, n, N[i]);
-        plot(&gr, condition, data[0], data[1]);
+        plot(&gr, data[0], data[1]);
     }
     gr.Axis();
     gr.Label('x', "\\omega, rad/s}", 0);
