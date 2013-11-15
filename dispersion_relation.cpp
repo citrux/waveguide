@@ -200,6 +200,8 @@ void draw_point(mglGraph *gr, std::pair<double, double> point)
 void plot_curves(std::string condition, const int number)
 {
     mglGraph gr; // create canvas
+    gr.SetFontDef("k:iC");
+    gr.SetFontSizePT(8);
     gr.SetRanges(0, number * pi / l1 , 0, number * pi / l2);
     double omega = 5e10;
     for (int i = 1; i <= number; i++) {
