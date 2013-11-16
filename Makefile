@@ -1,4 +1,6 @@
-text: scheme plots
+all: scheme plots text
+
+text:
 	latexmk -pdf text.tex
 	cp text.pdf ~/Dropbox/Public/works/electrodynamics_mw.pdf
 
