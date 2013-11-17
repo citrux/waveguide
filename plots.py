@@ -2,6 +2,7 @@
 ###############################################################################
 # графическое решение дисперсионного уравнения
 # совместимо и с python 3, и c python 3
+# частоты (СВЧ 3 ÷ 30 ГГц) → omega = 20 ÷ 200 Град/с
 ###############################################################################
 
 DEBUG = False
@@ -20,124 +21,99 @@ e2, m2, l2 = 5.0, 1.0, 1.5
 b = 3.0
 # скорость света, см/с
 c = 3e10
-# частоты (СВЧ 3 ÷ 30 ГГц) → omega = 20 ÷ 200 Град/с
-OMEGA = np.linspace(2e10, 6e10, 5)
 
-def e_condition(u1, u2):
+def e_relation(u1, u2):
     return u1 * tan(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
 
-def m_condition(u1, u2):
+def m_relation(u1, u2):
     return m1 * tan(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
 
 def bisection(f, left, right, precision=5e-3):
     """
     Метод бисекции поиска корня (трансцендентного) уравнения
     """
+    def sgn(x):
+        if x > 0:
+            return 1
+        if x < 0:
+            return -1
+        return 0
+
     center = (left + right) / 2.0
     if right-left < precision:
         return center
-    elif f(left) * f(right) > 0:
+    if sgn(f(left)) * sgn(f(right)) > 0:
         return False
-    else:
-        if f(center) * f(left) <= 0:
-            return bisection(f, left, center)
-        else:
-            return bisection(f, center, right)
+    if sgn(f(center)) * sgn(f(left)) <= 0:
+        return bisection(f, left, center)
+    return bisection(f, center, right)
 
 
-def curve(condition, n1, n2):
-    delta = 0.005
+def transversal_wavenumbers(relation, m, omega, precision):
+    for i in range(2*m):
+        lt = ((2*m - i) / l2) ** 2 - (i / l1) ** 2 -\
+                (2 * omega / c / pi) ** 2 * (e2 * m2 - e1 * m1)
+        rd = ((2*m - i - 1) / l2) ** 2 - ((i + 1) / l1) ** 2 -\
+                (2 * omega / c / pi) ** 2 * (e2 * m2 - e1 * m1)
 
-    # границы области, в которой ищется решение
-    left = n1 * pi / 2.0 / l1
-    right = (n1 + 1) * pi / 2.0 / l1
-    bottom = n2 * pi / 2.0 / l2
-    top = (n2 + 1) * pi/2.0/l2
+        if lt * rd < 0:
+            first = lambda x: x
+            second = lambda x:\
+                    (x ** 2 + (omega / c) ** 2 * (e2 * m2 - e1 * m1)) ** 0.5
 
-    U1 = np.arange(left + delta, right - delta, delta)
-    x,y = [],[]
-    for u1 in U1:
-        u2 = bisection(lambda u2: condition(u1, u2), bottom + delta, top - delta)
-        if u2:
-            x.append(u1)
-            y.append(u2)
-    return x, y
+            left = i * pi / 2.0 / l1
+            right = (i + 1) * pi / 2.0 / l1
+            down = (2 * m - i - 1) * pi / 2.0 / l2
+            up = (2 * m - i) * pi / 2.0 / l2
 
+            new_left = down ** 2 -  (omega / c) ** 2 * (e2 * m2 - e1 * m1)
+            new_right = up ** 2 -  (omega / c) ** 2 * (e2 * m2 - e1 * m1)
+            if new_left > left ** 2:
+                left = new_left ** 0.5
+            if new_right < right ** 2:
+                right = new_right ** 0.5
 
-def plot_wavenumbers_relationship(omega, color="k", right=7):
-    U1 = np.linspace(0, right, 100)
-    u2 = lambda u1: ((e2 * m2 - e1 * m1) * omega ** 2 / c ** 2 + u1 ** 2) ** 0.5
-    U2 = list(map(u2, U1))
-    plt.plot(U1, U2, "%s-" % color)
+            margin = 1e-7
+            u1 = bisection(lambda x: relation(first(x),\
+                second(x)), left + margin, right - margin, precision)
+            u2 = second(u1)
 
+            if DEBUG:
+                print("m = %d, n1 = %d, n2 = %d, lt = %.2f, rd = %.2f" %\
+                    (m, i, 2*m - i - 1, lt, rd))
+                print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
+                    (left, right, u1, u2))
+                print("=" * 20)
 
-def solution(condition, n1, n2, omega, delta=1e-4):
-    test = lambda u1, u2: (u1 ** 2 - u2 ** 2 -\
-                    omega ** 2 / c ** 2 * (e1 * m1 - e2 * m2))
-    # u1
-    left = n1 * pi / 2.0 / l1 + delta
-    right = (n1 + 1) * pi / 2.0 / l1 - delta
-    # u2
-    bottom = n2 * pi / 2.0 / l2 + delta ** 2    # немного магии: из-за "плохих"
-    top = (n2 + 1) * pi / 2.0 / l2 - delta ** 2 # производных приходится ставить
-                                                # разные границы
-    u2 = lambda u1: bisection(lambda u2: condition(u1, u2), bottom, top, delta)
-    result = False
-    sleft = u2(left)
-    sright = u2(right)
-
-    #print(test(left, sleft) * test(right, sright))
-    while test(left, sleft) * test(right, sright) <= 0:
-        #print(left, right, sleft, sright)
-        center = (left + right) / 2.0
-        if test(left, sleft) * test(center, u2(center)) <= 0:
-            right = center
-            sright = u2(center)
-        elif (right-left) <= delta:
-            if abs(test(left, sleft)) < abs(test(right, sright)):
-                result = (left, sleft)
-                break
-            else:
-                result = (right, sright)
-                break
-        else:
-            left = center
-            sleft = u2(center)
-    return result
-
-def transversal_wavenumbers(condition, n, omega, delta):
-    for i in range(2*n):
-        a = solution(condition, i, 2*n - 1 - i, omega, delta)
-        if a:
-            u1, u2 = a
-            b = -log(delta) / log(10)
-            u1 = round(u1 * 10 ** b) * 10 ** -b
-            u2 = round(u2 * 10 ** b) * 10 ** -b
             return u1, u2
-    return False, False
+    return 0, 0
 
-def plot_transversal(condition):
-    m = 3
-    k = 0
-    color = ["r", "y", "g", "c", "b", "m"]
-    for omega in OMEGA:
-        plot_wavenumbers_relationship(omega, color[k], (m + 1) * pi / 2.0 / l1)
-        k += 1
-    for i in range(m):
-        n = 2 * i + 1
-        for j in range(n+1):
-            U1, U2 = curve(condition, j, n - j)
+
+def plot_transversal(relation, m_list, omega_list, precision):
+    for m in m_list:
+        for j in range(2 * m):
             # нарисуем границы прямоугольников
             left = j * pi / 2.0 / l1
             right = (j + 1) * pi / 2.0 / l1
-            bottom = (n - j) * pi / 2.0 / l2
-            top = (n - j + 1) * pi / 2.0 / l2
+            down = (2 * m - 1 - j) * pi / 2.0 / l2
+            up = (2 * m - j) * pi / 2.0 / l2
             plt.plot([right, left, left, right, right],
-                    [bottom, bottom, top, top, bottom], "k:")
-            plt.plot(U1, U2, "k-")
+                    [down, down, up, up, down], "k:")
 
-        for omega in OMEGA:
-            u1, u2 = transversal_wavenumbers(condition, i + 1, omega, 1e-7)
+            u1_list, u2_list = [], []
+            margin = 1e-9
+            u1 = left + margin
+            while u1 < right:
+                u2 = bisection(lambda x: relation(u1, x),
+                        down + margin, up - margin, precision)
+                if u2:
+                    u1_list.append(u1)
+                    u2_list.append(u2)
+                u1 += precision
+            plt.plot(u1_list, u2_list, "k-")
+
+        for omega in omega_list:
+            u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-7)
             plt.plot([u1], [u2], "ro")
 
     plt.xlabel(r"$u_1, cm^{-1}$")
@@ -146,9 +122,9 @@ def plot_transversal(condition):
     if DEBUG:
         plt.show()
     else:
-        if condition is e_condition:
+        if relation is e_relation:
             name = "e"
-        elif condition is m_condition:
+        elif relation is m_relation:
             name = "m"
         else:
             name = "wtf"
@@ -156,38 +132,51 @@ def plot_transversal(condition):
     plt.cla()
 
 
-def longitudinal_wavenumber(condition, n, k):
-    H, O = [], []
-    for omega in np.linspace(2e10, 6e10, 100):
-        u1, u2 = transversal_wavenumbers(condition, k, omega, 1e-7)
-        sqr_h = omega ** 2 / c ** 2 * (e1 * m1) - u1 ** 2 - (pi * n / b) ** 2
-        if u1 and u2 and sqr_h > 0:
-            O.append(omega)
-            H.append(sqr_h ** 0.5)
-    return O, H
+def longitudinal_wavenumber(relation, m, n, omega, precision):
+    u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
+    if (u1 > 0):
+        sqr_h = (omega / c) ** 2 * e1 * m1 - u1 ** 2 - (pi * n / b) ** 2
+        if (sqr_h > 0):
+            h = sqr_h ** 0.5
+            return h
+    return 0
 
-def plot_longitudinal(condition, n, N):
-    for i in N:
-        O, H = longitudinal_wavenumber(condition, n, i)
-        plt.plot(O, H, "k-")
 
+def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
+    for m in m_list:
+        for n in n_list:
+            h_list = [longitudinal_wavenumber(relation, m, n, omega_list[0],
+                precision)]
+            o_list = [omega_list[0]]
+            for omega in omega_list:
+                h = longitudinal_wavenumber(relation, m, n, omega, precision)
+                if (h == 0) and (h_list[-1] == 0):
+                    h_list[-1] = h
+                    o_list[-1] = omega
+                elif h >= h_list[-1]:
+                    h_list.append(h)
+                    o_list.append(omega)
+            plt.plot(o_list, h_list, "k-")
     plt.xlabel(r"$\omega, rad/s$")
     plt.ylabel(r"$h, cm^{-1}$")
     if DEBUG:
         plt.show()
     else:
-        if condition is e_condition:
+        if relation is e_relation:
             name = "e_h"
-        elif condition is m_condition:
+        elif relation is m_relation:
             name = "m_h"
         else:
             name = "wtf"
         plt.savefig(name + ".png")
     plt.cla()
 
+
 if __name__ == '__main__':
-    plot_transversal(e_condition)
-    plot_transversal(m_condition)
-    plot_longitudinal(e_condition, 1, [1,2,3])
-    plot_longitudinal(m_condition, 1, [2,3])
+    plot_transversal(e_relation, [1,2,3,4], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    plot_transversal(m_relation, [1,2,3,4], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    plot_longitudinal(e_relation, [2,3,4], [1,2,3],
+            np.linspace(2e10, 13e10, 200), 1e-4)
+    plot_longitudinal(m_relation, [2,3,4], [0,1,2],
+            np.linspace(2e10, 13e10, 200), 1e-4)
 
