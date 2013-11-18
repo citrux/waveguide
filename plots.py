@@ -1,12 +1,14 @@
 # coding: utf-8
 ###############################################################################
 # графическое решение дисперсионного уравнения
-# совместимо и с python 3, и c python 3
-# частоты (СВЧ 3 ÷ 30 ГГц) → omega = 20 ÷ 200 Град/с
+# совместимо и с python 3, и sol python 3
+# частоты СВЧ 3 ÷ 30 ГГц → omega = 20 ÷ 200 Град/с
 ###############################################################################
 
 DEBUG = False
 
+import timeit
+import os
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
@@ -18,9 +20,13 @@ plt.rc('font', family='serif')
 
 e1, m1, l1 = 1.0, 1.0, 3.5
 e2, m2, l2 = 5.0, 1.0, 1.5
+a = 5.0
 b = 3.0
+c = 1.5
 # скорость света, см/с
-c = 3e10
+sol = 3e10
+e0 = 8.85e-12
+m0 = 4 * pi * 1e-7
 
 def e_relation(u1, u2):
     return u1 * tan(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
@@ -28,7 +34,7 @@ def e_relation(u1, u2):
 def m_relation(u1, u2):
     return m1 * tan(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
 
-def bisection(f, left, right, precision=5e-3):
+def bisection(f, left, right, precision):
     """
     Метод бисекции поиска корня (трансцендентного) уравнения
     """
@@ -45,29 +51,50 @@ def bisection(f, left, right, precision=5e-3):
     if sgn(f(left)) * sgn(f(right)) > 0:
         return False
     if sgn(f(center)) * sgn(f(left)) <= 0:
-        return bisection(f, left, center)
-    return bisection(f, center, right)
+        return bisection(f, left, center, precision)
+    return bisection(f, center, right, precision)
 
+
+def secant(f, left, right, precision):
+    """
+    Метод секущих поиска корня (трансцендентного) уравнения
+    """
+    def sgn(x):
+        if x > 0:
+            return 1
+        if x < 0:
+            return -1
+        return 0
+
+    center = (left * f(right) - right * f(left)) / (f(right) - f(left))
+    #print("%.3f %.3f %.3f" % (left, center, right))
+    if (center - left < precision) or (right - center < precision):
+        return center
+    if sgn(f(left)) * sgn(f(right)) > 0:
+        return False
+    if sgn(f(center)) * sgn(f(left)) <= 0:
+        return bisection(f, left, center, precision)
+    return bisection(f, center, right, precision)
 
 def transversal_wavenumbers(relation, m, omega, precision):
     for i in range(2*m):
         lt = ((2*m - i) / l2) ** 2 - (i / l1) ** 2 -\
-                (2 * omega / c / pi) ** 2 * (e2 * m2 - e1 * m1)
+                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
         rd = ((2*m - i - 1) / l2) ** 2 - ((i + 1) / l1) ** 2 -\
-                (2 * omega / c / pi) ** 2 * (e2 * m2 - e1 * m1)
+                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
 
         if lt * rd < 0:
             first = lambda x: x
             second = lambda x:\
-                    (x ** 2 + (omega / c) ** 2 * (e2 * m2 - e1 * m1)) ** 0.5
+                    (x ** 2 + (omega / sol) ** 2 * (e2 * m2 - e1 * m1)) ** 0.5
 
             left = i * pi / 2.0 / l1
             right = (i + 1) * pi / 2.0 / l1
             down = (2 * m - i - 1) * pi / 2.0 / l2
             up = (2 * m - i) * pi / 2.0 / l2
 
-            new_left = down ** 2 -  (omega / c) ** 2 * (e2 * m2 - e1 * m1)
-            new_right = up ** 2 -  (omega / c) ** 2 * (e2 * m2 - e1 * m1)
+            new_left = down ** 2 -  (omega / sol) ** 2 * (e2 * m2 - e1 * m1)
+            new_right = up ** 2 -  (omega / sol) ** 2 * (e2 * m2 - e1 * m1)
             if new_left > left ** 2:
                 left = new_left ** 0.5
             if new_right < right ** 2:
@@ -114,13 +141,51 @@ def plot_transversal(relation, m_list, omega_list, precision):
             plt.plot(u1_list, u2_list, "k-")
 
         for omega in omega_list:
-            u1_list = np.linspace(0, m * pi / l1, 100)
-            u2_list =\
-                [((omega / c) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
-                for u1 in u1_list]
-            plt.plot(u1_list, u2_list, "k--")
-            u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-7)
-            plt.plot([u1], [u2], "ro")
+            # отмечаем решение
+            u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
+            if u2:
+                plt.plot([u1], [u2], "ko")
+
+    for omega in omega_list:
+        # рисуем гиперболу для частоты
+        n = 0 if relation is m_relation else 1
+        sqr_border = (omega/sol)**2 * e1 * m1 - (pi * n / b) ** 2
+        border = sqr_border ** 0.5 if sqr_border > 0 else 0
+        u1_list = np.arange(0, border, precision)
+        u2_list =\
+            [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
+            for u1 in u1_list]
+        plt.plot(u1_list, u2_list, "k-", linewidth=.5)
+        u1_list = np.arange(0, m * pi / l1, precision)
+        u2_list =\
+            [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
+            for u1 in u1_list]
+        plt.plot(u1_list, u2_list, "k--", linewidth=.5)
+
+        # рисуем отсечки для заданной частоты
+        n_max = int(omega / sol * (e1 * m1) ** 0.5 * b / pi)
+        while n <= n_max:
+            sqr_border = (omega/sol)**2 * e1 * m1 - (pi * n / b) ** 2
+            if sqr_border > 0:
+                u1 = sqr_border ** 0.5
+                u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) +\
+                        u1 ** 2) ** 0.5
+                plt.plot([u1], [u2], "wh", linewidth=.5)
+                plt.annotate('$n=%d$' % n, xy=(u1, u2+.05), ha="center",
+                        va="bottom")
+            n += 1
+
+        # подписываем частоты
+        src="%e" % omega
+        mantissa, exponent = src.split("e")
+        mantissa = mantissa.strip("0 .")
+        exponent = exponent.strip(" +")
+        plt.annotate(
+                '$\\omega = %s \\cdot 10^{%s} rad/s$' % (mantissa, exponent),
+                xy=(u1_list[-1]+.2, u2_list[-1]-.3),
+                ha="right", va="top")
+
+
 
     plt.xlabel(r"$u_1, cm^{-1}$")
     plt.ylabel(r"$u_2, cm^{-1}$")
@@ -134,14 +199,17 @@ def plot_transversal(relation, m_list, omega_list, precision):
             name = "m"
         else:
             name = "wtf"
-        plt.savefig(name + ".png")
+        if os.path.isfile(name + ".pdf"):
+            print("renaming...")
+            os.rename(name + ".pdf", name + "(old).pdf")
+        plt.savefig(name + ".pdf")
     plt.cla()
 
 
 def longitudinal_wavenumber(relation, m, n, omega, precision):
     u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
     if (u1 > 0):
-        sqr_h = (omega / c) ** 2 * e1 * m1 - u1 ** 2 - (pi * n / b) ** 2
+        sqr_h = (omega / sol) ** 2 * e1 * m1 - u1 ** 2 - (pi * n / b) ** 2
         if (sqr_h > 0):
             h = sqr_h ** 0.5
             return h
@@ -174,15 +242,87 @@ def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
             name = "m_h"
         else:
             name = "wtf"
-        plt.savefig(name + ".png")
+        if os.path.isfile(name + ".pdf"):
+            print("renaming...")
+            os.rename(name + ".pdf", name + "(old).pdf")
+        plt.savefig(name + ".pdf")
     plt.cla()
 
 
-if __name__ == '__main__':
-    plot_transversal(e_relation, [1,2,3,4], [2e10, 4e10, 6e10, 8e10], 1e-3)
-    plot_transversal(m_relation, [1,2,3,4], [2e10, 4e10, 6e10, 8e10], 1e-3)
-    plot_longitudinal(e_relation, [2,3,4], [1,2,3],
-            np.linspace(2e10, 13e10, 200), 1e-4)
-    plot_longitudinal(m_relation, [2,3,4], [0,1,2],
-            np.linspace(2e10, 13e10, 200), 1e-4)
+def plot_transversal_field(relation, m, n, omega):
+    u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-3)
+    h = ((omega/sol)**2 * e1 * m1 - u1 **2 - (pi*n/b) ** 2) ** 0.5
+    sqr_g1 = u1 **2 + (pi * n / b) ** 2
+    sqr_g2 = u2 **2 + (pi * n / b) ** 2
+    if relation is e_relation:
+        E1 = 1
+        H1 = -E1 * e1 * e0 * omega * pi * n / u1 / h / b
+        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
+        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
+    if relation is m_relation:
+        H1 = 1
+        E1 = H1 * m1 * m0 * omega * pi * n / u1 / h / b
+        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
+        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
+    # левая область (2): от 0 до с
+    Y2, X2 = np.mgrid[0:b:46j, 0:c:91j]
+    E2x = -(h * u2 * E2 - omega * m0 * m2 * pi * n / b * H2) * np.cos(u2*X2) *\
+            np.sin(pi * n / b * Y2) / sqr_g2
+    E2y = -(h * pi * n / b * E2 + omega * m0 * m2 * u2 * H2) * np.sin(u2*X2) *\
+            np.cos(pi * n / b * Y2) / sqr_g2
+    E2xy = np.sqrt(E2x*E2x + E2y*E2y)
 
+    H2x = (omega * e0 * e2 * pi * n / b * E2 + h * u2 * H2) * np.sin(u2*X2) *\
+            np.cos(pi * n / b * Y2) / sqr_g2
+    H2y = -(omega * e0 * e2 * u2 * E2 - h * pi * n / b * H2) * np.cos(u2*X2) *\
+            np.sin(pi * n / b * Y2) / sqr_g2
+    H2xy = np.sqrt(H2x*H2x + H2y*H2y)
+
+    # правая область (1): от c до a
+    Y1, X1 = np.mgrid[0:b:91j, c:a:106j]
+    E1x = -(h * u1 * E1 - omega * m0 * m1 * pi * n / b * H1) *\
+            np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1) / sqr_g1
+    E1y = -(h * pi * n / b * E1 + omega * m0 * m1 * u1 * H1) *\
+            np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1) / sqr_g1
+    E1xy = np.sqrt(E1x*E1x + E1y*E1y)
+
+    H1x = (omega * e0 * e1 * pi * n / b * E1 + h * u1 * H1) *\
+            np.sin(u1*(X1-a)) * np.cos(pi * n / b * Y1) / sqr_g1
+    H1y = -(omega * e0 * e1 * u1 * E1 - h * pi * n / b * H1) *\
+            np.cos(u1*(X1-a)) * np.sin(pi * n / b * Y1) / sqr_g1
+    H1xy = np.sqrt(H1x*H1x + H1y*H1y)
+
+    Emax = max(E1xy.max(), E2xy.max())
+    Hmax = max(H1xy.max(), H2xy.max())
+
+    lw = 1.5 * E2xy / Emax
+    plt.streamplot(X2, Y2, E2x, E2y, density=.4, color='k', linewidth=lw)
+
+    lw = 1.5 * H2xy / Hmax
+    plt.streamplot(X2, Y2, H2x, H2y, density=.4, color='b', linewidth=lw)
+
+    lw = 1.5 * E1xy / Emax
+    plt.streamplot(X1, Y1, E1x, E1y, density=.7, color='k', linewidth=lw)
+
+    lw = 1.5 * H1xy / Hmax
+    plt.streamplot(X1, Y1, H1x, H1y, density=.7, color='b', linewidth=lw)
+
+    plt.savefig("field_%d_%d_%.2e.pdf" %(m,n,omega))
+
+
+
+if __name__ == '__main__':
+
+    #start = timeit.default_timer()
+    #plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
+    #stop = timeit.default_timer()
+    #print(stop - start)
+    #start = timeit.default_timer()
+    #plot_transversal(m_relation, [1,2,3,4], [3e10, 5e10, 7e10, 9e10], 1e-4)
+    #stop = timeit.default_timer()
+    #print(stop - start)
+    #plot_longitudinal(e_relation, [2,3,4], [1,2,3],
+            #np.linspace(2e10, 13e10, 200), 1e-4)
+    #plot_longitudinal(m_relation, [2,3,4], [0,1,2],
+            #np.linspace(2e10, 13e10, 200), 1e-4)
+    plot_transversal_field(e_relation, 3, 1, 7e10)
