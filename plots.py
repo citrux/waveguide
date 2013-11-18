@@ -74,18 +74,19 @@ def transversal_wavenumbers(relation, m, omega, precision):
                 right = new_right ** 0.5
 
             margin = 1e-7
-            u1 = bisection(lambda x: relation(first(x),\
-                second(x)), left + margin, right - margin, precision)
-            u2 = second(u1)
+            if relation(left + margin, second(left + margin)) <= 0:
+                u1 = bisection(lambda x: relation(first(x),\
+                    second(x)), left + margin, right - margin, precision)
+                u2 = second(u1)
 
-            if DEBUG:
-                print("m = %d, n1 = %d, n2 = %d, lt = %.2f, rd = %.2f" %\
-                    (m, i, 2*m - i - 1, lt, rd))
-                print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
-                    (left, right, u1, u2))
-                print("=" * 20)
+                if DEBUG:
+                    print("m = %d, n1 = %d, n2 = %d, lt = %.2f, rd = %.2f" %\
+                        (m, i, 2*m - i - 1, lt, rd))
+                    print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
+                        (left, right, u1, u2))
+                    print("=" * 20)
 
-            return u1, u2
+                return u1, u2
     return 0, 0
 
 
@@ -113,6 +114,11 @@ def plot_transversal(relation, m_list, omega_list, precision):
             plt.plot(u1_list, u2_list, "k-")
 
         for omega in omega_list:
+            u1_list = np.linspace(0, m * pi / l1, 100)
+            u2_list =\
+                [((omega / c) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
+                for u1 in u1_list]
+            plt.plot(u1_list, u2_list, "k--")
             u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-7)
             plt.plot([u1], [u2], "ro")
 
