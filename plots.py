@@ -217,6 +217,14 @@ def longitudinal_wavenumber(relation, m, n, omega, precision):
 
 
 def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
+    if relation is e_relation:
+        family = "varepsilon"
+        name = "e_h"
+        color = "black"
+    elif relation is m_relation:
+        family = "mu"
+        name = "m_h"
+        color = "blue"
     for m in m_list:
         for n in n_list:
             h_list = [longitudinal_wavenumber(relation, m, n, omega_list[0],
@@ -230,18 +238,16 @@ def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
                 elif h >= h_list[-1]:
                     h_list.append(h)
                     o_list.append(omega)
-            plt.plot(o_list, h_list, "k-")
+            if h_list[-1] > 0:
+                plt.plot(o_list, h_list, color=color)
+                plt.annotate('$\\%s_{%d%d}$' % (family, m, n),
+                        xy=(o_list[-1]+.1e10, h_list[-1]), ha="left", va="center",
+                        color=color)
     plt.xlabel(r"$\omega, rad/s$")
     plt.ylabel(r"$h, cm^{-1}$")
     if DEBUG:
         plt.show()
     else:
-        if relation is e_relation:
-            name = "e_h"
-        elif relation is m_relation:
-            name = "m_h"
-        else:
-            name = "wtf"
         if os.path.isfile(name + ".pdf"):
             print("renaming...")
             os.rename(name + ".pdf", name + "(old).pdf")
@@ -259,13 +265,15 @@ def plot_transversal_field(relation, m, n, omega):
         H1 = -E1 * e1 * e0 * omega * pi * n / u1 / h / b
         E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
         H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
-    if relation is m_relation:
+        family = "e"
+    elif relation is m_relation:
         H1 = 1
         E1 = H1 * m1 * m0 * omega * pi * n / u1 / h / b
         E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
         H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
+        family = "m"
     # левая область (2): от 0 до с
-    Y2, X2 = np.mgrid[0:b:46j, 0:c:91j]
+    Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
     E2x = -(h * u2 * E2 - omega * m0 * m2 * pi * n / b * H2) * np.cos(u2*X2) *\
             np.sin(pi * n / b * Y2) / sqr_g2
     E2y = -(h * pi * n / b * E2 + omega * m0 * m2 * u2 * H2) * np.sin(u2*X2) *\
@@ -307,7 +315,7 @@ def plot_transversal_field(relation, m, n, omega):
     lw = 1.5 * H1xy / Hmax
     plt.streamplot(X1, Y1, H1x, H1y, density=.7, color='b', linewidth=lw)
 
-    plt.savefig("field_%d_%d_%.2e.pdf" %(m,n,omega))
+    plt.savefig("field_%s_%d_%d_%.2e.pdf" %(family,m,n,omega))
 
 
 
@@ -321,8 +329,8 @@ if __name__ == '__main__':
     #plot_transversal(m_relation, [1,2,3,4], [3e10, 5e10, 7e10, 9e10], 1e-4)
     #stop = timeit.default_timer()
     #print(stop - start)
-    #plot_longitudinal(e_relation, [2,3,4], [1,2,3],
-            #np.linspace(2e10, 13e10, 200), 1e-4)
-    #plot_longitudinal(m_relation, [2,3,4], [0,1,2],
-            #np.linspace(2e10, 13e10, 200), 1e-4)
-    plot_transversal_field(e_relation, 3, 1, 7e10)
+    #plot_longitudinal(e_relation, [2,3], [1,2],
+            #np.linspace(2e10, 10e10, 200), 1e-4)
+    #plot_longitudinal(m_relation, [2,3], [0,1,2],
+            #np.linspace(2e10, 10e10, 200), 1e-4)
+    #plot_transversal_field(e_relation, 3, 1, 6e10)
