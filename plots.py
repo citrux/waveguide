@@ -18,21 +18,30 @@ from math import pi, tan, log
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
-e1, m1, l1 = 1.0, 1.0, 3.5
-e2, m2, l2 = 5.0, 1.0, 1.5
 a = 5.0
 b = 3.0
 c = 1.5
+e1, m1, l1 = 1.0, 1.0, a - c
+e2, m2, l2 = 5.0, 1.0, c
 # скорость света, см/с
 sol = 3e10
 e0 = 8.85e-12
 m0 = 4 * pi * 1e-7
 
+
+def save_file(fname)
+    if os.path.isfile(fname):
+        os.rename(fname, fname + ".old")
+    plt.savefig(fname)
+
+
 def e_relation(u1, u2):
     return u1 * tan(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
 
+
 def m_relation(u1, u2):
     return m1 * tan(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
+
 
 def bisection(f, left, right, precision):
     """
@@ -54,27 +63,6 @@ def bisection(f, left, right, precision):
         return bisection(f, left, center, precision)
     return bisection(f, center, right, precision)
 
-
-def secant(f, left, right, precision):
-    """
-    Метод секущих поиска корня (трансцендентного) уравнения
-    """
-    def sgn(x):
-        if x > 0:
-            return 1
-        if x < 0:
-            return -1
-        return 0
-
-    center = (left * f(right) - right * f(left)) / (f(right) - f(left))
-    #print("%.3f %.3f %.3f" % (left, center, right))
-    if (center - left < precision) or (right - center < precision):
-        return center
-    if sgn(f(left)) * sgn(f(right)) > 0:
-        return False
-    if sgn(f(center)) * sgn(f(left)) <= 0:
-        return bisection(f, left, center, precision)
-    return bisection(f, center, right, precision)
 
 def transversal_wavenumbers(relation, m, omega, precision):
     for i in range(2*m):
@@ -185,8 +173,6 @@ def plot_transversal(relation, m_list, omega_list, precision):
                 xy=(u1_list[-1]+.2, u2_list[-1]-.3),
                 ha="right", va="top")
 
-
-
     plt.xlabel(r"$u_1, cm^{-1}$")
     plt.ylabel(r"$u_2, cm^{-1}$")
 
@@ -199,10 +185,7 @@ def plot_transversal(relation, m_list, omega_list, precision):
             name = "m"
         else:
             name = "wtf"
-        if os.path.isfile(name + ".pdf"):
-            print("renaming...")
-            os.rename(name + ".pdf", name + "(old).pdf")
-        plt.savefig(name + ".pdf")
+        save_file(name + ".pdf")
     plt.cla()
 
 
@@ -241,17 +224,14 @@ def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
             if h_list[-1] > 0:
                 plt.plot(o_list, h_list, color=color)
                 plt.annotate('$\\%s_{%d%d}$' % (family, m, n),
-                        xy=(o_list[-1]+.1e10, h_list[-1]), ha="left", va="center",
-                        color=color)
+                        xy=(o_list[-1]+.1e10, h_list[-1]), ha="left",
+                        va="center", color=color)
     plt.xlabel(r"$\omega, rad/s$")
     plt.ylabel(r"$h, cm^{-1}$")
     if DEBUG:
         plt.show()
     else:
-        if os.path.isfile(name + ".pdf"):
-            print("renaming...")
-            os.rename(name + ".pdf", name + "(old).pdf")
-        plt.savefig(name + ".pdf")
+        save_file(name + ".pdf")
     plt.cla()
 
 
@@ -315,8 +295,8 @@ def plot_transversal_field(relation, m, n, omega):
     lw = 1.5 * H1xy / Hmax
     plt.streamplot(X1, Y1, H1x, H1y, density=.7, color='b', linewidth=lw)
 
-    plt.savefig("field_%s_%d_%d_%.2e.pdf" %(family,m,n,omega))
-
+    plt.savefig("field_%s_%d_%d_%.1e.pdf" %(family, m, n, omega))
+    plt.cla()
 
 
 if __name__ == '__main__':
