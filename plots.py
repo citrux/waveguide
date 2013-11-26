@@ -29,7 +29,7 @@ e0 = 8.85e-12
 m0 = 4 * pi * 1e-7
 
 
-def save_file(fname)
+def save_file(fname):
     if os.path.isfile(fname):
         os.rename(fname, fname + ".old")
     plt.savefig(fname)
@@ -302,14 +302,14 @@ def plot_transversal_field(relation, m, n, omega):
 
 if __name__ == '__main__':
 
-    #start = timeit.default_timer()
-    #plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
-    #stop = timeit.default_timer()
-    #print(stop - start)
-    #start = timeit.default_timer()
-    #plot_transversal(m_relation, [1,2,3,4], [3e10, 5e10, 7e10, 9e10], 1e-4)
-    #stop = timeit.default_timer()
-    #print(stop - start)
+    start = timeit.default_timer()
+    plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
+    stop = timeit.default_timer()
+    print(stop - start)
+    start = timeit.default_timer()
+    plot_transversal(m_relation, [1,2,3,4], [3e10, 5e10, 7e10, 9e10], 1e-4)
+    stop = timeit.default_timer()
+    print(stop - start)
     #plot_longitudinal(e_relation, [2,3], [1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
     #plot_longitudinal(m_relation, [2,3], [0,1,2],
