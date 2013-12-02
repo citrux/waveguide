@@ -1,0 +1,78 @@
+    Запишем пару уравнений Максвелла для электромагнитного поля:
+    \[
+        \left\{
+        \begin{array}{l}
+            \rotor\vec{E} = -\mu\pder{\vec{H}}{t},\\
+            \rotor\vec{H} = \eps\pder{\vec{E}}{t}.
+        \end{array}
+        \right.
+    \]
+    Рассматривая распространение волны в волноводе, представим поля в виде
+    \[
+        \vec{E}(x,y,z) = \vec{E}(x,y) \cdot e^{i(\omega t - hz)},\quad
+        \vec{H}(x,y,z) = \vec{H}(x,y) \cdot e^{i(\omega t - hz)}
+    \]
+    Распишем теперь векторные уравнения покоординатно:
+    \[
+        \left\{
+            \begin{array}{l}
+                \pder{E_z}{y} + ihE_y = -i\omega\mu H_x,\\
+                -ihE_x - \pder{E_z}{x} = -i\omega\mu H_y,\\
+                \pder{E_y}{x} - \pder{E_x}{y} = -i\omega\mu H_z,\\
+                \pder{H_z}{y} + ihH_y = i\omega\eps E_x,\\
+                -ihH_x - \pder{H_z}{x} = i\omega\eps E_y,\\
+                \pder{H_y}{x} - \pder{H_x}{y} = i\omega\eps E_z,\\
+            \end{array}
+        \right.
+    \]
+    Отсюда можно получить выражения для поперечных компонент поля, через
+    продольные:
+    \[
+        \left\{
+        \begin{array}{l}
+            \omega\mu H_x + h E_y = i\pder{E_z}{y},\\
+            h H_x + \omega\eps E_y = i\pder{H_z}{x}
+        \end{array}
+        \right.
+        \quad
+        \left\{
+        \begin{array}{l}
+            \omega\mu H_y - h E_x = -i\pder{E_z}{x},\\
+            h H_y - \omega\eps E_x = i\pder{H_z}{y}
+        \end{array}
+        \right.
+    \]
+    \[
+        \left\{
+        \begin{array}{l}
+            E_x = -\frac{i}{g^2}\left( h\pder{E_z}{x} +
+            \omega\mu\pder{H_z}{y} \right),\\
+            E_y = -\frac{i}{g^2}\left( h\pder{E_z}{y} -
+            \omega\mu\pder{H_z}{x} \right),\\
+            H_x = \frac{i}{g^2}\left(
+            \omega\eps\pder{E_z}{y} - h \pder{H_z}{x} \right),\\
+            H_y = -\frac{i}{g^2}\left(
+            \omega\eps\pder{E_z}{x} + h \pder{H_z}{y} \right).
+        \end{array}
+        \right.
+    \]
+    Осталось найти выражения для продольных компонент. Для этого вернёмся к
+    векторным уравнениям и возьмём ротор от обеих частей первого уравнения:
+    \[
+        \rotor\rotor\vec{E} = -\mu \pder{}{t}\rotor\vec{H} =
+        -\eps\mu\ppder{E}{t}.
+    \]
+    \[
+        \rotor\rotor\vec{E} = \gradient\divergence\vec{E} - \Delta\vec{E},
+    \]
+    \[
+        \Delta\vec{E} - \eps\mu\ppder{E}{t} = 0.
+    \]
+    Учтём теперь вид поля в волноводе, и получим
+    \[
+        \Delta_\perp \vec{E}(x,y) + g^2\vec{E}(x,y) = 0.
+    \]
+    Совершенно аналогично можно получить для магнитного поля
+    \[
+        \Delta_\perp \vec{H}(x,y) + g^2\vec{H}(x,y) = 0.
+    \]
