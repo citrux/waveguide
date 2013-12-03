@@ -7,33 +7,10 @@
 
 DEBUG = False
 
-import timeit
-import os
-import matplotlib
 import numpy as np
-import matplotlib.pyplot as plt
-
 from math import pi, tan, log
-
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
-
-a = 5.0
-b = 3.0
-c = 1.5
-e1, m1, l1 = 1.0, 1.0, a - c
-e2, m2, l2 = 5.0, 1.0, c
-# скорость света, см/с
-sol = 3e10
-e0 = 8.85e-12
-m0 = 4 * pi * 1e-7
-
-
-def save_file(fname):
-    if os.path.isfile(fname):
-        os.rename(fname, fname + ".old")
-    plt.savefig(fname)
-
+import matplotlib.pyplot as plt
+from settings import *
 
 def e_relation(u1, u2):
     return u1 * tan(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
@@ -105,7 +82,13 @@ def transversal_wavenumbers(relation, m, omega, precision):
     return 0, 0
 
 
-def plot_transversal(relation, m_list, omega_list, precision):
+def transversal_data(relation, m_list, omega_list, precision):
+    result = {
+        "borders": [],
+        "solutions": [],
+        "curves": [],
+        "hyperboles": []
+    }
     for m in m_list:
         for j in range(2 * m):
             # нарисуем границы прямоугольников
@@ -113,8 +96,6 @@ def plot_transversal(relation, m_list, omega_list, precision):
             right = (j + 1) * pi / 2.0 / l1
             down = (2 * m - 1 - j) * pi / 2.0 / l2
             up = (2 * m - j) * pi / 2.0 / l2
-            plt.plot([right, left, left, right, right],
-                    [down, down, up, up, down], "k:")
 
             u1_list, u2_list = [], []
             margin = 1e-9
@@ -126,13 +107,13 @@ def plot_transversal(relation, m_list, omega_list, precision):
                     u1_list.append(u1)
                     u2_list.append(u2)
                 u1 += precision
-            plt.plot(u1_list, u2_list, "k-")
+            result["curves"].append((u1_list, u2_list))
 
         for omega in omega_list:
             # отмечаем решение
             u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
             if u2:
-                plt.plot([u1], [u2], "ko")
+                result["solutions"].append([u1, u2])
 
     for omega in omega_list:
         # рисуем гиперболу для частоты
@@ -143,12 +124,11 @@ def plot_transversal(relation, m_list, omega_list, precision):
         u2_list =\
             [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
             for u1 in u1_list]
-        plt.plot(u1_list, u2_list, "k-", linewidth=.5)
-        u1_list = np.arange(0, m * pi / l1, precision)
-        u2_list =\
+        v1_list = np.arange(border, m * pi / l1, precision)
+        v2_list =\
             [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
-            for u1 in u1_list]
-        plt.plot(u1_list, u2_list, "k--", linewidth=.5)
+            for u1 in v1_list]
+        result["hyperboles"].append((u1_list, u2_list, v1_list, v2_list))
 
         # рисуем отсечки для заданной частоты
         n_max = int(omega / sol * (e1 * m1) ** 0.5 * b / pi)
@@ -158,35 +138,9 @@ def plot_transversal(relation, m_list, omega_list, precision):
                 u1 = sqr_border ** 0.5
                 u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) +\
                         u1 ** 2) ** 0.5
-                plt.plot([u1], [u2], "wh", linewidth=.5)
-                plt.annotate('$n=%d$' % n, xy=(u1, u2+.05), ha="center",
-                        va="bottom")
+                result["borders"].append([u1, u2])
             n += 1
-
-        # подписываем частоты
-        src="%e" % omega
-        mantissa, exponent = src.split("e")
-        mantissa = mantissa.strip("0 .")
-        exponent = exponent.strip(" +")
-        plt.annotate(
-                '$\\omega = %s \\cdot 10^{%s} rad/s$' % (mantissa, exponent),
-                xy=(u1_list[-1]+.2, u2_list[-1]-.3),
-                ha="right", va="top")
-
-    plt.xlabel(r"$u_1, cm^{-1}$")
-    plt.ylabel(r"$u_2, cm^{-1}$")
-
-    if DEBUG:
-        plt.show()
-    else:
-        if relation is e_relation:
-            name = "e"
-        elif relation is m_relation:
-            name = "m"
-        else:
-            name = "wtf"
-        save_file(name + ".pdf")
-    plt.cla()
+    return result
 
 
 def longitudinal_wavenumber(relation, m, n, omega, precision):
@@ -301,15 +255,12 @@ def plot_transversal_field(relation, m, n, omega):
 
 
 if __name__ == '__main__':
-
-    start = timeit.default_timer()
-    plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
-    stop = timeit.default_timer()
-    print(stop - start)
-    start = timeit.default_timer()
-    plot_transversal(m_relation, [1,2,3,4], [3e10, 5e10, 7e10, 9e10], 1e-4)
-    stop = timeit.default_timer()
-    print(stop - start)
+    plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    plt.savefig("new_e.pdf")
+    plt.cla()
+    plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10, 9e10], 1e-3)
+    plt.savefig("new_m.pdf")
+    plt.cla()
     #plot_longitudinal(e_relation, [2,3], [1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
     #plot_longitudinal(m_relation, [2,3], [0,1,2],
