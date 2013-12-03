@@ -18,7 +18,7 @@ def plot_transversal(relation, m_list, omega_list, precision):
     data = hw.transversal_data(rel, m_list, omega_list, precision)
     for x, y in data["curves"]:
         plt.plot(x, y, "k-")
-    for x, y, u, v in data["hyperboles"]:
+    for x, y, u, v in data["frequencies"]:
         plt.plot(x, y, "k-", linewidth=0.5)
         plt.plot(u, v, "k--", linewidth=0.5)
     for x, y in data["borders"]:
@@ -29,7 +29,7 @@ def plot_transversal(relation, m_list, omega_list, precision):
     data = sw.transversal_data(rel, m_list, omega_list, precision)
     for x, y in data["curves"]:
         plt.plot([-t for t in x], y, "k-")
-    for x, y, u, v in data["hyperboles"]:
+    for x, y, u, v in data["frequencies"]:
         plt.plot([-t for t in x], y, "k-", linewidth=0.5)
         plt.plot([-t for t in u], v, "k--", linewidth=0.5)
     for x, y in data["borders"]:

@@ -87,7 +87,7 @@ def transversal_data(relation, m_list, omega_list, precision):
         "borders": [],
         "solutions": [],
         "curves": [],
-        "hyperboles": []
+        "frequencies": []
     }
     for m in m_list:
         for j in range(2 * m):
@@ -128,7 +128,7 @@ def transversal_data(relation, m_list, omega_list, precision):
         v2_list =\
             [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) + u1 ** 2) ** 0.5\
             for u1 in v1_list]
-        result["hyperboles"].append((u1_list, u2_list, v1_list, v2_list))
+        result["frequencies"].append((u1_list, u2_list, v1_list, v2_list))
 
         # рисуем отсечки для заданной частоты
         n_max = int(omega / sol * (e1 * m1) ** 0.5 * b / pi)

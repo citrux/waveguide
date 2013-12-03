@@ -77,7 +77,7 @@ def transversal_data(relation, m_list, omega_list, precision):
         "borders": [],
         "solutions": [],
         "curves": [],
-        "hyperboles": []
+        "frequencies": []
     }
     for m in m_list:
         j = 0 if relation is m_relation else 1
@@ -119,7 +119,7 @@ def transversal_data(relation, m_list, omega_list, precision):
             else:
                 break
             u1 += precision
-        result["hyperboles"].append((u1_list, u2_list, [], []))
+        result["frequencies"].append((u1_list, u2_list, [], []))
 
 
         # рисуем отсечки для заданной частоты
