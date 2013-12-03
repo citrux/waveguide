@@ -17,25 +17,25 @@ def plot_transversal(relation, m_list, omega_list, precision):
     rel = hw.e_relation if relation=="e" else hw.m_relation
     data = hw.transversal_data(rel, m_list, omega_list, precision)
     for x, y in data["curves"]:
-        plt.plot([t**2 for t in x], [t**2 for t in y], "k-")
+        plt.plot(x, y, "k-")
     for x, y, u, v in data["frequencies"]:
-        plt.plot([t**2 for t in x], [t**2 for t in y], "k-", linewidth=0.5)
-        plt.plot([t**2 for t in u], [t**2 for t in v], "k--", linewidth=0.5)
+        plt.plot(x, y, "k-", linewidth=0.5)
+        plt.plot(u, v, "k--", linewidth=0.5)
     for x, y in data["borders"]:
-        plt.plot(x**2, y**2, "wh", markersize=3)
+        plt.plot(x, y, "wh", markersize=3)
     for x, y in data["solutions"]:
-        plt.plot(x**2, y**2, "ko", markersize=3)
+        plt.plot(x, y, "ko", markersize=3)
     rel = sw.e_relation if relation=="e" else sw.m_relation
     data = sw.transversal_data(rel, m_list, omega_list, precision)
     for x, y in data["curves"]:
-        plt.plot([-t**2 for t in x], [t**2 for t in y], "k-")
+        plt.plot([-t for t in x], y, "k-")
     for x, y, u, v in data["frequencies"]:
-        plt.plot([-t**2 for t in x], [t**2 for t in y], "k-", linewidth=0.5)
-        plt.plot([-t**2 for t in u], [t**2 for t in v], "k--", linewidth=0.5)
+        plt.plot([-t for t in x], y, "k-", linewidth=0.5)
+        plt.plot([-t for t in u], v, "k--", linewidth=0.5)
     for x, y in data["borders"]:
-        plt.plot(-x**2, y**2, "wh", markersize=3)
+        plt.plot(-x, y, "wh", markersize=3)
     for x, y in data["solutions"]:
-        plt.plot(-x**2, y**2, "ko", markersize=3)
+        plt.plot(-x, y, "ko", markersize=3)
     plt.xlabel(r"$u_1^2, cm^{-2}$")
     plt.ylabel(r"$u_2^2, cm^{-2}$")
     save_file(plt, relation + ".pdf")

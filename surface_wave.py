@@ -93,8 +93,8 @@ def transversal_data(relation, m_list, omega_list, precision):
             u2 = bisection(lambda x: relation(u1, x),
                     down + margin, up - margin, precision)
             if u2:
-                u1_list.append(u1)
-                u2_list.append(u2)
+                u1_list.append(u1 ** 2)
+                u2_list.append(u2 ** 2)
             u1 += precision
         result["curves"].append((u1_list, u2_list))
 
@@ -102,38 +102,33 @@ def transversal_data(relation, m_list, omega_list, precision):
             # отмечаем решение
             u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
             if u1 and u2:
-                result["solutions"].append([u1, u2])
+                result["solutions"].append([u1 ** 2, u2 ** 2])
                 
     for omega in omega_list:
         # рисуем окружность для частоты
         n = 0 if relation is m_relation else 1
-        sqr_border = (pi * n / b) ** 2 - (omega/sol)**2 * e1 * m1
-        border = sqr_border ** 0.5 if sqr_border > 0 else 0
-        u1 = 0
-        u1_list, u2_list = [], []
-        while u1 < right:
-            sqr_u2 = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - u1 ** 2
-            if sqr_u2 >= 0:
-                u1_list.append(u1)
-                u2_list.append(sqr_u2 ** 0.5)
-            else:
-                break
-            u1 += precision
-        result["frequencies"].append((u1_list, u2_list, [], []))
+        border = (pi * n / b) ** 2 - (omega/sol)**2 * e1 * m1
+        if border < 0:
+            border = 0
+        u = [0, border]
+        v = [(omega / sol) ** 2 * (e2 * m2 - e1 * m1) - sqr_u1 for sqr_u1 in u]
+        x = [border, (omega / sol) ** 2 * (e2 * m2 - e1 * m1)]
+        y = [(omega / sol) ** 2 * (e2 * m2 - e1 * m1) - sqr_u1 for sqr_u1 in x]
+        result["frequencies"].append((x, y, u, v))
 
 
         # рисуем отсечки для заданной частоты
-        n = 0
-        n_max = 3
-        while n <= n_max:
-            sqr_border = (pi * n / b) ** 2 - (omega/sol) ** 2 * e1 * m1
-            if sqr_border > 0 and\
-                sqr_border < (omega / sol) ** 2 * (e2 * m2 - e1 * m1):
-                u1 = sqr_border ** 0.5
-                u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) -\
-                        u1 ** 2) ** 0.5
-                result["borders"].append([u1, u2])
-            n += 1
+        # n = 0
+        # n_max = 3
+        # while n <= n_max:
+        #     sqr_border = (pi * n / b) ** 2 - (omega/sol) ** 2 * e1 * m1
+        #     if sqr_border > 0 and\
+        #         sqr_border < (omega / sol) ** 2 * (e2 * m2 - e1 * m1):
+        #         u1 = sqr_border ** 0.5
+        #         u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) -\
+        #                 u1 ** 2) ** 0.5
+        #         result["borders"].append([u1, u2])
+        #     n += 1
     return result
 
 
