@@ -65,58 +65,45 @@ def bisection(f, left, right, precision):
 
 
 def transversal_wavenumbers(relation, m, omega, precision):
-    for i in range(2*m):
-        lt = ((2*m - i) / l2) ** 2 - (i / l1) ** 2 -\
-                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
-        rd = ((2*m - i - 1) / l2) ** 2 - ((i + 1) / l1) ** 2 -\
-                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
+    first = lambda x: x
+    second = lambda x:\
+            ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - x ** 2) ** 0.5
 
-        if lt * rd < 0:
-            first = lambda x: x
-            second = lambda x:\
-                    ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - x ** 2) ** 0.5
+    down = (2 * m - 1) * pi / 2.0 / l2
+    up = (2 * m) * pi / 2.0 / l2
 
-            left = i * pi / 2.0 / l1
-            right = (i + 1) * pi / 2.0 / l1
-            down = (2 * m - i - 1) * pi / 2.0 / l2
-            up = (2 * m - i) * pi / 2.0 / l2
+    sqr_right = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - down ** 2
+    sqr_left = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - up ** 2
 
-            new_left = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - down ** 2
-            new_right = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - up ** 2
-            if new_left > left ** 2:
-                left = new_left ** 0.5
-            if new_right < right ** 2:
-                right = new_right ** 0.5
+    left = sqr_left ** 0.5 if sqr_left > 0 else 0
+    right = sqr_right ** 0.5 if sqr_right > 0 else 0
 
-            margin = 1e-7
-            if relation(left + margin, second(left + margin)) <= 0:
-                u1 = bisection(lambda x: relation(first(x),\
-                    second(x)), left + margin, right - margin, precision)
-                u2 = second(u1)
+    margin = 1e-7
+    if relation(left + margin, second(left + margin)) >= 0:
+        u1 = bisection(lambda x: relation(first(x),\
+            second(x)), left + margin, right - margin, precision)
+        u2 = second(u1)
 
-                if DEBUG:
-                    print("m = %d, n1 = %d, n2 = %d, lt = %.2f, rd = %.2f" %\
-                        (m, i, 2*m - i - 1, lt, rd))
-                    print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
-                        (left, right, u1, u2))
-                    print("=" * 20)
+        if DEBUG:
+            print("m = %d, down = %.2f, up = %.2f" %\
+                (m, down, up))
+            print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
+                (left, right, u1, u2))
+            print("=" * 20)
 
-                return u1, u2
+        return u1, u2
     return 0, 0
 
 
 def plot_transversal(relation, m_list, omega_list, precision):
     for m in m_list:
-        # for j in range(2 * m):
-        #     # нарисуем границы прямоугольников
-        #     left = j * pi / 2.0 / l1
-        #     right = (j + 1) * pi / 2.0 / l1
         down = (2 * m - 1) * pi / 2.0 / l2
         up = (2 * m) * pi / 2.0 / l2
-        #     plt.plot([right, left, left, right, right],
-        #             [down, down, up, up, down], "k:")
         left = 0
         right = 5
+        plt.plot([right, left], [down, down], "k:")
+        plt.plot([right, left], [up, up], "k:")
+
         u1_list, u2_list = [], []
         margin = 1e-9
         u1 = left + margin
@@ -129,17 +116,17 @@ def plot_transversal(relation, m_list, omega_list, precision):
             u1 += precision
         plt.plot(u1_list, u2_list, "k-")
 
-        # for omega in omega_list:
-        #     # отмечаем решение
-        #     u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
-        #     if u2:
-        #         plt.plot([u1], [u2], "ko")
+        for omega in omega_list:
+            # отмечаем решение
+            u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
+            if u1 and u2:
+                plt.plot([u1], [u2], "ko")
 
     for omega in omega_list:
-        # рисуем гиперболу для частоты
-        # n = 0 if relation is m_relation else 1
-        # sqr_border = (pi * n / b) ** 2 - (omega/sol)**2 * e1 * m1
-        # border = sqr_border ** 0.5 if sqr_border > 0 else 0
+        # рисуем окружность для частоты
+        n = 0 if relation is m_relation else 1
+        sqr_border = (pi * n / b) ** 2 - (omega/sol)**2 * e1 * m1
+        border = sqr_border ** 0.5 if sqr_border > 0 else 0
         u1 = 0
         u1_list, u2_list = [], []
         while u1 < right:
@@ -151,24 +138,22 @@ def plot_transversal(relation, m_list, omega_list, precision):
                 break
             u1 += precision
         plt.plot(u1_list, u2_list, "k-", linewidth=.5)
-        # u1_list = np.arange(0, right, precision)
-        # u2_list =\
-        #     [((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - u1 ** 2) ** 0.5\
-        #     for u1 in u1_list]
-        # plt.plot(u1_list, u2_list, "k--", linewidth=.5)
 
-    #     # рисуем отсечки для заданной частоты
-    #     n_max = int(omega / sol * (e1 * m1) ** 0.5 * b / pi)
-    #     while n <= n_max:
-    #         sqr_border = (omega/sol)**2 * e1 * m1 - (pi * n / b) ** 2
-    #         if sqr_border > 0:
-    #             u1 = sqr_border ** 0.5
-    #             u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) +\
-    #                     u1 ** 2) ** 0.5
-    #             plt.plot([u1], [u2], "wh", linewidth=.5)
-    #             plt.annotate('$n=%d$' % n, xy=(u1, u2+.05), ha="center",
-    #                     va="bottom")
-    #         n += 1
+
+        # рисуем отсечки для заданной частоты
+        n = 0
+        n_max = 3
+        while n <= n_max:
+            sqr_border = (pi * n / b) ** 2 - (omega/sol) ** 2 * e1 * m1
+            if sqr_border > 0 and\
+                sqr_border < (omega / sol) ** 2 * (e2 * m2 - e1 * m1):
+                u1 = sqr_border ** 0.5
+                u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) -\
+                        u1 ** 2) ** 0.5
+                plt.plot([u1], [u2], "wh", linewidth=.5)
+                plt.annotate('$n=%d$' % n, xy=(u1, u2+.05), ha="center",
+                        va="bottom")
+            n += 1
 
         # подписываем частоты
         src="%e" % omega
@@ -313,10 +298,11 @@ if __name__ == '__main__':
     # plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
     # stop = timeit.default_timer()
     # print(stop - start)
-    start = timeit.default_timer()
+    # start = timeit.default_timer()
     plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10], 1e-3)
-    stop = timeit.default_timer()
-    print(stop - start)
+    # print(transversal_wavenumbers(m_relation, 1, 3e10, 1e-3))
+    # stop = timeit.default_timer()
+    # print(stop - start)
     #plot_longitudinal(e_relation, [2,3], [1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
     #plot_longitudinal(m_relation, [2,3], [0,1,2],
