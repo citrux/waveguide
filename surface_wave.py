@@ -7,33 +7,10 @@
 
 DEBUG = False
 
-import timeit
-import os
-import matplotlib
 import numpy as np
-import matplotlib.pyplot as plt
 
 from math import pi, tan, log, tanh
-
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
-
-a = 5.0
-b = 3.0
-c = 1.5
-e1, m1, l1 = 1.0, 1.0, a - c
-e2, m2, l2 = 5.0, 1.0, c
-# скорость света, см/с
-sol = 3e10
-e0 = 8.85e-12
-m0 = 4 * pi * 1e-7
-
-
-def save_file(fname):
-    if os.path.isfile(fname):
-        os.rename(fname, fname + ".old")
-    plt.savefig(fname)
-
+from settings import *
 
 def e_relation(u1, u2):
     return -u1 * tanh(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
@@ -68,9 +45,9 @@ def transversal_wavenumbers(relation, m, omega, precision):
     first = lambda x: x
     second = lambda x:\
             ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - x ** 2) ** 0.5
-
-    down = (2 * m - 1) * pi / 2.0 / l2
-    up = (2 * m) * pi / 2.0 / l2
+    j = 0 if relation is m_relation else 1
+    down = (2 * m - 1 + j) * pi / 2.0 / l2
+    up = (2 * m + j) * pi / 2.0 / l2
 
     sqr_right = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - down ** 2
     sqr_left = (omega / sol) ** 2 * (e2 * m2 - e1 * m1) - up ** 2
@@ -95,14 +72,19 @@ def transversal_wavenumbers(relation, m, omega, precision):
     return 0, 0
 
 
-def plot_transversal(relation, m_list, omega_list, precision):
+def transversal_data(relation, m_list, omega_list, precision):
+    result = {
+        "borders": [],
+        "solutions": [],
+        "curves": [],
+        "hyperboles": []
+    }
     for m in m_list:
-        down = (2 * m - 1) * pi / 2.0 / l2
-        up = (2 * m) * pi / 2.0 / l2
+        j = 0 if relation is m_relation else 1
+        down = (2 * m - 1 + j) * pi / 2.0 / l2
+        up = (2 * m + j) * pi / 2.0 / l2
         left = 0
-        right = 5
-        plt.plot([right, left], [down, down], "k:")
-        plt.plot([right, left], [up, up], "k:")
+        right = (max(omega_list) / sol) * (e2 * m2 - e1 * m1) ** 0.5
 
         u1_list, u2_list = [], []
         margin = 1e-9
@@ -114,14 +96,14 @@ def plot_transversal(relation, m_list, omega_list, precision):
                 u1_list.append(u1)
                 u2_list.append(u2)
             u1 += precision
-        plt.plot(u1_list, u2_list, "k-")
+        result["curves"].append((u1_list, u2_list))
 
         for omega in omega_list:
             # отмечаем решение
             u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
             if u1 and u2:
-                plt.plot([u1], [u2], "ko")
-
+                result["solutions"].append([u1, u2])
+                
     for omega in omega_list:
         # рисуем окружность для частоты
         n = 0 if relation is m_relation else 1
@@ -137,7 +119,7 @@ def plot_transversal(relation, m_list, omega_list, precision):
             else:
                 break
             u1 += precision
-        plt.plot(u1_list, u2_list, "k-", linewidth=.5)
+        result["hyperboles"].append((u1_list, u2_list, [], []))
 
 
         # рисуем отсечки для заданной частоты
@@ -150,35 +132,10 @@ def plot_transversal(relation, m_list, omega_list, precision):
                 u1 = sqr_border ** 0.5
                 u2 = ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) -\
                         u1 ** 2) ** 0.5
-                plt.plot([u1], [u2], "wh", linewidth=.5)
-                plt.annotate('$n=%d$' % n, xy=(u1, u2+.05), ha="center",
-                        va="bottom")
+                result["borders"].append([u1, u2])
             n += 1
+    return result
 
-        # подписываем частоты
-        src="%e" % omega
-        mantissa, exponent = src.split("e")
-        mantissa = mantissa.strip("0 .")
-        exponent = exponent.strip(" +")
-        plt.annotate(
-                '$\\omega = %s \\cdot 10^{%s} rad/s$' % (mantissa, exponent),
-                xy=(u1_list[-1], u2_list[-1]),
-                ha="left", va="bottom")
-
-    plt.xlabel(r"$u_1, cm^{-1}$")
-    plt.ylabel(r"$u_2, cm^{-1}$")
-
-    if DEBUG:
-        plt.show()
-    else:
-        if relation is e_relation:
-            name = "e"
-        elif relation is m_relation:
-            name = "m"
-        else:
-            name = "wtf"
-        save_file(name + ".pdf")
-    plt.cla()
 
 
 def longitudinal_wavenumber(relation, m, n, omega, precision):
