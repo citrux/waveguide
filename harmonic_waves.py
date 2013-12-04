@@ -42,6 +42,8 @@ def bisection(f, left, right, precision):
 
 
 def transversal_wavenumbers(relation, m, omega, precision):
+    if (m == 0):
+        return 0, 0
     for i in range(2*m):
         lt = ((2*m - i) / l2) ** 2 - (i / l1) ** 2 -\
                 (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
@@ -149,15 +151,10 @@ def longitudinal_wavenumber(relation, m, n, omega, precision):
     return 0
 
 
-def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
-    if relation is e_relation:
-        family = "varepsilon"
-        name = "e_h"
-        color = "black"
-    elif relation is m_relation:
-        family = "mu"
-        name = "m_h"
-        color = "blue"
+def longitudinal_data(relation, m_list, n_list, omega_list, precision):
+    result = {
+        "curves": []
+    }
     for m in m_list:
         for n in n_list:
             h_list = [longitudinal_wavenumber(relation, m, n, omega_list[0],
@@ -171,19 +168,8 @@ def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
                 elif h >= h_list[-1]:
                     h_list.append(h)
                     o_list.append(omega)
-            if h_list[-1] > 0:
-                plt.plot(o_list, h_list, color=color)
-                plt.annotate('$\\%s_{%d%d}$' % (family, m, n),
-                        xy=(o_list[-1]+.1e10, h_list[-1]), ha="left",
-                        va="center", color=color)
-    plt.xlabel(r"$\omega, rad/s$")
-    plt.ylabel(r"$h, cm^{-1}$")
-    if DEBUG:
-        plt.show()
-    else:
-        save_file(name + ".pdf")
-    plt.cla()
-
+            result["curves"].append((o_list, h_list));
+    return result
 
 def plot_transversal_field(relation, m, n, omega):
     u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-3)

@@ -1,5 +1,6 @@
 import os
 import matplotlib.pyplot as plt
+import numpy as np
 import harmonic_waves as hw
 import surface_wave as sw
 
@@ -42,6 +43,63 @@ def plot_transversal(relation, m_list, omega_list, precision):
     plt.cla()
 
 
+def plot_longitudinal(m_list, n_list, omega_list, precision):
+    for m in m_list:
+        for n in n_list:
+            h_list, o_list = [], []
+            for omega in omega_list:
+                h = hw.longitudinal_wavenumber(hw.m_relation, m, n, omega, precision)
+                if h > 0:
+                    h_list.append(h)
+                    o_list.append(omega)
+                if len(h_list) and (h == 0):
+                    break;
+            plt.plot(o_list, h_list, "b-")
+            # ------------------------------
+            h_list, o_list = [], []
+            for omega in omega_list:
+                h = sw.longitudinal_wavenumber(sw.m_relation, m, n, omega, precision)
+                if h > 0:
+                    h_list.append(h)
+                    o_list.append(omega)
+                if len(h_list) and (h == 0):
+                    break;
+            plt.plot(o_list, h_list, "b--")
+            print("plot m %d %d" %(m,n))
+            
+            # ------------------------------
+            # ------------------------------
+            
+            if (n == 0):
+                continue
+            print(n)
+            h_list, o_list = [], []
+            for omega in omega_list:
+                h = hw.longitudinal_wavenumber(hw.e_relation, m, n, omega, precision)
+                if h > 0:
+                    h_list.append(h)
+                    o_list.append(omega)
+                if len(h_list) and (h == 0):
+                    break;
+            plt.plot(o_list, h_list, "k-")
+            # ------------------------------
+            h_list, o_list = [], []
+            for omega in omega_list:
+                h = sw.longitudinal_wavenumber(sw.e_relation, m, n, omega, precision)
+                if h > 0:
+                    h_list.append(h)
+                    o_list.append(omega)
+                if len(h_list) and (h == 0):
+                    break;
+            plt.plot(o_list, h_list, "k--")
+            print("plot e %d %d" %(m,n))
+    plt.xlabel(r"$\omega, rad/s$")
+    plt.ylabel(r"$h, cm^{-1}$")
+    save_file(plt, "dispersion.pdf")
+    plt.cla()
+
+
 if __name__ == '__main__':
-    plot_transversal("e", [0,1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
-    plot_transversal("m", [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    # plot_transversal("e", [0,1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    # plot_transversal("m", [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    plot_longitudinal([0,1], [0,1], np.arange(0, 1e11, 1e8), 1e-3)

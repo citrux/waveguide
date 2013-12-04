@@ -8,8 +8,8 @@
 DEBUG = False
 
 import numpy as np
-
-from math import pi, tan, log, tanh
+import matplotlib.pyplot as plt
+from math import pi, tan, log, tanh, cosh, sinh
 from settings import *
 
 def e_relation(u1, u2):
@@ -42,6 +42,8 @@ def bisection(f, left, right, precision):
 
 
 def transversal_wavenumbers(relation, m, omega, precision):
+    if relation is m_relation and (m == 0):
+        return 0, 0
     first = lambda x: x
     second = lambda x:\
             ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - x ** 2) ** 0.5
@@ -136,65 +138,29 @@ def transversal_data(relation, m_list, omega_list, precision):
 def longitudinal_wavenumber(relation, m, n, omega, precision):
     u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
     if (u1 > 0):
-        sqr_h = (omega / sol) ** 2 * e1 * m1 - u1 ** 2 - (pi * n / b) ** 2
+        sqr_h = (omega / sol) ** 2 * e1 * m1 + u1 ** 2 - (pi * n / b) ** 2
         if (sqr_h > 0):
             h = sqr_h ** 0.5
             return h
     return 0
 
 
-def plot_longitudinal(relation, m_list, n_list, omega_list, precision):
-    if relation is e_relation:
-        family = "varepsilon"
-        name = "e_h"
-        color = "black"
-    elif relation is m_relation:
-        family = "mu"
-        name = "m_h"
-        color = "blue"
-    for m in m_list:
-        for n in n_list:
-            h_list = [longitudinal_wavenumber(relation, m, n, omega_list[0],
-                precision)]
-            o_list = [omega_list[0]]
-            for omega in omega_list:
-                h = longitudinal_wavenumber(relation, m, n, omega, precision)
-                if (h == 0) and (h_list[-1] == 0):
-                    h_list[-1] = h
-                    o_list[-1] = omega
-                elif h >= h_list[-1]:
-                    h_list.append(h)
-                    o_list.append(omega)
-            if h_list[-1] > 0:
-                plt.plot(o_list, h_list, color=color)
-                plt.annotate('$\\%s_{%d%d}$' % (family, m, n),
-                        xy=(o_list[-1]+.1e10, h_list[-1]), ha="left",
-                        va="center", color=color)
-    plt.xlabel(r"$\omega, rad/s$")
-    plt.ylabel(r"$h, cm^{-1}$")
-    if DEBUG:
-        plt.show()
-    else:
-        save_file(name + ".pdf")
-    plt.cla()
-
-
 def plot_transversal_field(relation, m, n, omega):
     u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-3)
-    h = ((omega/sol)**2 * e1 * m1 - u1 **2 - (pi*n/b) ** 2) ** 0.5
-    sqr_g1 = u1 **2 + (pi * n / b) ** 2
+    h = ((omega/sol)**2 * e1 * m1 + u1 **2 - (pi*n/b) ** 2) ** 0.5
+    sqr_g1 = -u1 **2 + (pi * n / b) ** 2
     sqr_g2 = u2 **2 + (pi * n / b) ** 2
     if relation is e_relation:
         E1 = 1
-        H1 = -E1 * e1 * e0 * omega * pi * n / u1 / h / b
-        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
-        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
+        H1 = E1 * e1 * e0 * omega * pi * n / u1 / h / b
+        E2 = E1 * np.sinh(u1 * (c - a)) / np.sin(u2 * c)
+        H2 = H1 * np.cosh(u1 * (c - a)) / np.cos(u2 * c)
         family = "e"
     elif relation is m_relation:
         H1 = 1
         E1 = H1 * m1 * m0 * omega * pi * n / u1 / h / b
-        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
-        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
+        E2 = E1 * np.sinh(u1 * (c - a)) / np.sin(u2 * c)
+        H2 = H1 * np.cosh(u1 * (c - a)) / np.cos(u2 * c)
         family = "m"
 
     # левая область (2): от 0 до с
@@ -214,15 +180,15 @@ def plot_transversal_field(relation, m, n, omega):
     # правая область (1): от c до a
     Y1, X1 = np.mgrid[0:b:91j, c:a:106j]
     E1x = -(h * u1 * E1 - omega * m0 * m1 * pi * n / b * H1) *\
-            np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1) / sqr_g1
-    E1y = -(h * pi * n / b * E1 + omega * m0 * m1 * u1 * H1) *\
-            np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1) / sqr_g1
+            np.cosh(u1*(X1 - a)) * np.sin(pi * n / b * Y1) / sqr_g1
+    E1y = -(h * pi * n / b * E1 - omega * m0 * m1 * u1 * H1) *\
+            np.sinh(u1*(X1 - a)) * np.cos(pi * n / b * Y1) / sqr_g1
     E1xy = np.sqrt(E1x*E1x + E1y*E1y)
 
-    H1x = (omega * e0 * e1 * pi * n / b * E1 + h * u1 * H1) *\
-            np.sin(u1*(X1-a)) * np.cos(pi * n / b * Y1) / sqr_g1
+    H1x = (omega * e0 * e1 * pi * n / b * E1 - h * u1 * H1) *\
+            np.sinh(u1*(X1-a)) * np.cos(pi * n / b * Y1) / sqr_g1
     H1y = -(omega * e0 * e1 * u1 * E1 - h * pi * n / b * H1) *\
-            np.cos(u1*(X1-a)) * np.sin(pi * n / b * Y1) / sqr_g1
+            np.cosh(u1*(X1-a)) * np.sin(pi * n / b * Y1) / sqr_g1
     H1xy = np.sqrt(H1x*H1x + H1y*H1y)
 
     Emax = max(E1xy.max(), E2xy.max())
@@ -251,7 +217,7 @@ if __name__ == '__main__':
     # stop = timeit.default_timer()
     # print(stop - start)
     # start = timeit.default_timer()
-    plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10], 1e-3)
+    # plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10], 1e-3)
     # print(transversal_wavenumbers(m_relation, 1, 3e10, 1e-3))
     # stop = timeit.default_timer()
     # print(stop - start)
@@ -259,4 +225,5 @@ if __name__ == '__main__':
             #np.linspace(2e10, 10e10, 200), 1e-4)
     #plot_longitudinal(m_relation, [2,3], [0,1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
-    #plot_transversal_field(e_relation, 3, 1, 6e10)
+    plot_transversal_field(m_relation, 2, 1, 7e10)
+    plot_transversal_field(e_relation, 2, 1, 7e10)
