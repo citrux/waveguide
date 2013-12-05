@@ -174,8 +174,6 @@ def longitudinal_data(relation, m_list, n_list, omega_list, precision):
 def plot_transversal_field(relation, m, n, omega):
     u1, u2 = transversal_wavenumbers(relation, m, omega, 1e-3)
     h = ((omega/sol)**2 * e1 * m1 - u1 **2 - (pi*n/b) ** 2) ** 0.5
-    sqr_g1 = u1 **2 + (pi * n / b) ** 2
-    sqr_g2 = u2 **2 + (pi * n / b) ** 2
     Y1, X1 = np.mgrid[0:b:91j, c:a:106j]
     Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
     if relation is e_relation:
