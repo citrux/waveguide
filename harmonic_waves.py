@@ -242,7 +242,18 @@ def plot_transversal_field(relation, m, n, omega):
 
     lw = 1.5 * H1xy / Hmax
     plt.streamplot(X1, Y1, H1x, H1y, density=.7, color='b', linewidth=lw)
-
+    plt.tick_params(\
+        axis='both',          # changes apply to both-axises
+        which='both',      # both major and minor ticks are affected
+        bottom='off',      # ticks along the bottom edge are off
+        top='off',         # ticks along the top edge are off
+        left='off',
+        right='off',
+        labelbottom='off',
+        labeltop='off',
+        labelleft='off',
+        labelright='off') # labels along the bottom edge are off
+    plt.plot([c,c], [0,b], "k-")
     plt.savefig("field_%s_%d_%d_%.1e.pdf" %(family, m, n, omega))
     plt.cla()
 
