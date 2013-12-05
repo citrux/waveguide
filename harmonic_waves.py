@@ -176,46 +176,59 @@ def plot_transversal_field(relation, m, n, omega):
     h = ((omega/sol)**2 * e1 * m1 - u1 **2 - (pi*n/b) ** 2) ** 0.5
     sqr_g1 = u1 **2 + (pi * n / b) ** 2
     sqr_g2 = u2 **2 + (pi * n / b) ** 2
-    if relation is e_relation:
-        E1 = 1
-        H1 = -E1 * e1 * e0 * omega * pi * n / u1 / h / b
-        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
-        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
-        family = "e"
-    elif relation is m_relation:
-        H1 = 1
-        E1 = H1 * m1 * m0 * omega * pi * n / u1 / h / b
-        E2 = E1 * np.sin(u1 * (c - a)) / np.sin(u2 * c)
-        H2 = H1 * np.cos(u1 * (c - a)) / np.cos(u2 * c)
-        family = "m"
-
-    # левая область (2): от 0 до с
-    Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
-    E2x = -(h * u2 * E2 - omega * m0 * m2 * pi * n / b * H2) * np.cos(u2*X2) *\
-            np.sin(pi * n / b * Y2) / sqr_g2
-    E2y = -(h * pi * n / b * E2 + omega * m0 * m2 * u2 * H2) * np.sin(u2*X2) *\
-            np.cos(pi * n / b * Y2) / sqr_g2
-    E2xy = np.sqrt(E2x*E2x + E2y*E2y)
-
-    H2x = (omega * e0 * e2 * pi * n / b * E2 + h * u2 * H2) * np.sin(u2*X2) *\
-            np.cos(pi * n / b * Y2) / sqr_g2
-    H2y = -(omega * e0 * e2 * u2 * E2 - h * pi * n / b * H2) * np.cos(u2*X2) *\
-            np.sin(pi * n / b * Y2) / sqr_g2
-    H2xy = np.sqrt(H2x*H2x + H2y*H2y)
-
-    # правая область (1): от c до a
     Y1, X1 = np.mgrid[0:b:91j, c:a:106j]
-    E1x = -(h * u1 * E1 - omega * m0 * m1 * pi * n / b * H1) *\
-            np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1) / sqr_g1
-    E1y = -(h * pi * n / b * E1 + omega * m0 * m1 * u1 * H1) *\
-            np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1) / sqr_g1
-    E1xy = np.sqrt(E1x*E1x + E1y*E1y)
+    Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
+    if relation is e_relation:
+        family = "e"
+        # левая область (2): от 0 до с
+        E2x = -(h ** 2 + (pi * n / b) ** 2) / u2 / h *\
+            np.sin (u1 * (c-a)) / np.sin(u2 * c) * \
+            np.cos(u2*X2) * np.sin(pi * n / b * Y2)
+        E2y = pi * n / h / b * np.sin (u1 * (c-a)) / np.sin(u2 * c) *\
+            np.sin(u2*X2) * np.cos(pi * n / b * Y2)
+        E2xy = np.sqrt(E2x*E2x + E2y*E2y)
 
-    H1x = (omega * e0 * e1 * pi * n / b * E1 + h * u1 * H1) *\
-            np.sin(u1*(X1-a)) * np.cos(pi * n / b * Y1) / sqr_g1
-    H1y = -(omega * e0 * e1 * u1 * E1 - h * pi * n / b * H1) *\
-            np.cos(u1*(X1-a)) * np.sin(pi * n / b * Y1) / sqr_g1
-    H1xy = np.sqrt(H1x*H1x + H1y*H1y)
+        H2x =  0 * X2
+        H2y = -e0 * e2 * omega / u2 * np.sin (u1 * (c-a)) / np.sin(u2 * c) * \
+            np.cos(u2*X2) * np.sin(pi * n / b * Y2)
+        H2xy = np.sqrt(H2x*H2x + H2y*H2y)
+
+        # правая область (1): от c до a
+        E1x = -(h ** 2 + (pi * n / b) ** 2) / u1 / h *\
+            np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1)
+        E1y = pi * n / h / b * np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1)
+        E1xy = np.sqrt(E1x*E1x + E1y*E1y)
+
+        H1x =  0 * X1
+        H1y = -e0 * e1 * omega / u1 *\
+            np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1)
+        H1xy = np.sqrt(H1x*H1x + H1y*H1y)
+    
+    elif relation is m_relation:
+        family = "m"
+        # левая область (2): от 0 до с
+        E2x = 0 * X2
+        E2y = -omega * m0 * m2 / u2 * np.cos(u1 * (c-a)) / np.cos(u2 * c) *\
+            np.sin(u2*X2) * np.cos(pi * n / b * Y2)
+        E2xy = np.sqrt(E2x*E2x + E2y*E2y)
+
+        H2x =  (h ** 2 + (pi * n / b) ** 2) / u2 / h *\
+            np.cos(u1 * (c-a)) / np.cos(u2 * c) *\
+            np.sin(u2*X2) * np.cos(pi * n / b * Y2)
+        H2y = -pi * n / h / b * np.cos(u1 * (c-a)) / np.cos(u2 * c) *\
+            np.cos(u2*X2) * np.sin(pi * n / b * Y2)
+        H2xy = np.sqrt(H2x*H2x + H2y*H2y)
+
+        # правая область (1): от c до a
+        E1x = 0 * X1
+        E1y = -omega * m0 * m2 / u1 * np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1)
+        E1xy = np.sqrt(E1x*E1x + E1y*E1y)
+
+        H1x =  (h ** 2 + (pi * n / b) ** 2) / u1 / h *\
+            np.sin(u1*(X1 - a)) * np.cos(pi * n / b * Y1)
+        H1y = -pi * n / h / b * np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1)
+        H1xy = np.sqrt(H1x*H1x + H1y*H1y)
+
 
     Emax = max(E1xy.max(), E2xy.max())
     Hmax = max(H1xy.max(), H2xy.max())
@@ -237,14 +250,15 @@ def plot_transversal_field(relation, m, n, omega):
 
 
 if __name__ == '__main__':
-    plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
-    plt.savefig("new_e.pdf")
-    plt.cla()
-    plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10, 9e10], 1e-3)
-    plt.savefig("new_m.pdf")
-    plt.cla()
+    # plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
+    # plt.savefig("new_e.pdf")
+    # plt.cla()
+    # plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10, 9e10], 1e-3)
+    # plt.savefig("new_m.pdf")
+    # plt.cla()
     #plot_longitudinal(e_relation, [2,3], [1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
     #plot_longitudinal(m_relation, [2,3], [0,1,2],
             #np.linspace(2e10, 10e10, 200), 1e-4)
-    #plot_transversal_field(e_relation, 3, 1, 6e10)
+    # plot_transversal_field(e_relation, 3, 1, 6e10)
+    plot_transversal_field(m_relation, 3, 1, 7e10)
