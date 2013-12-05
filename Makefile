@@ -1,13 +1,13 @@
 all: scheme text
 
 text:
-	latexmk -pdf text.tex
-	cp text.pdf ~/Dropbox/Public/works/electrodynamics_mw.pdf
+	latexmk -pdf -cd report/text.tex
+	cp report/text.pdf ~/Dropbox/Public/works/electrodynamics_mw.pdf
 
 scheme:
-	asy scheme.asy
+	cd report && asy scheme.asy
 
 clean:
-	rm -f scheme.pdf
-	latexmk -C
+	rm -f report/scheme.pdf
+	cd report && latexmk -C
 
