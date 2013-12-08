@@ -5,7 +5,7 @@ import harmonic_waves as hw
 import surface_wave as sw
 
 plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
+plt.rc('font', family='serif', size=5)
 
 
 def save_file(plot, fname):
@@ -44,8 +44,7 @@ def plot_transversal(relation, m_list, omega_list, precision):
 
 
 def plot_longitudinal(m_list, n_list, omega_list, precision):
-    for m in m_list:
-        for n in n_list:
+    for m, n in [(1,0), (1,1), (2,0), (1,2), (2,1), (3,0)]:
             h_list, o_list = [], []
             for omega in omega_list:
                 h = hw.longitudinal_wavenumber(hw.m_relation, m, n, omega, precision)
@@ -65,11 +64,13 @@ def plot_longitudinal(m_list, n_list, omega_list, precision):
                 if len(h_list) and (h == 0):
                     break;
             plt.plot(o_list, h_list, "b--")
-            print("plot m %d %d" %(m,n))
+            if h_list:
+                plt.annotate(r"$\mu_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
+            # print("plot m %d %d" %(m,n))
             
             # ------------------------------
             # ------------------------------
-            
+    for m, n in [(0,1), (0,2), (1,1), (2,1)]:
             if (n == 0):
                 continue
             print(n)
@@ -92,7 +93,11 @@ def plot_longitudinal(m_list, n_list, omega_list, precision):
                 if len(h_list) and (h == 0):
                     break;
             plt.plot(o_list, h_list, "k--")
-            print("plot e %d %d" %(m,n))
+            if h_list:
+                plt.annotate(r"$\varepsilon_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
+
+            # plt.annotate
+            # print("plot e %d %d" %(m,n))
     plt.xlabel(r"$\omega, rad/s$")
     plt.ylabel(r"$h, cm^{-1}$")
     save_file(plt, "dispersion.pdf")
@@ -102,4 +107,4 @@ def plot_longitudinal(m_list, n_list, omega_list, precision):
 if __name__ == '__main__':
     # plot_transversal("e", [0,1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
     # plot_transversal("m", [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-3)
-    plot_longitudinal([0,1], [0,1], np.arange(0, 1e11, 1e8), 1e-3)
+    # plot_longitudinal([0,1,2,3], [0,1,2], np.arange(0, 1e11, 1e8), 1e-3)

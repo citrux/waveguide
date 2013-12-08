@@ -207,17 +207,17 @@ def plot_transversal_field(relation, m, n, omega):
     Hmax = max(H1xy.max(), H2xy.max())
 
     lw = 1.5 * E2xy / Emax
-    plt.streamplot(X2, Y2, E2x, E2y, density=.4, color='k', linewidth=lw)
+    plt.streamplot(X2, Y2, E2x, E2y, density=.4, color="k", linewidth=lw)
 
     lw = 1.5 * H2xy / Hmax
-    plt.streamplot(X2, Y2, H2x, H2y, density=.4, color='b', linewidth=lw)
+    plt.streamplot(X2, Y2, H2x, H2y, density=.4, color="b", linewidth=lw)
 
     lw = 1.5 * E1xy / Emax
-    plt.streamplot(X1, Y1, E1x, E1y, density=.7, color='k', linewidth=lw)
+    plt.streamplot(X1, Y1, E1x, E1y, density=.7, color="k", linewidth=lw)
 
     lw = 1.5 * H1xy / Hmax
-    plt.streamplot(X1, Y1, H1x, H1y, density=.7, color='b', linewidth=lw)
-    plt.tick_params(\
+    plt.streamplot(X1, Y1, H1x, H1y, density=.7, color="b", linewidth=lw)
+    plt.tick_params(
         axis='both',          # changes apply to both-axises
         which='both',      # both major and minor ticks are affected
         bottom='off',      # ticks along the bottom edge are off
@@ -229,23 +229,18 @@ def plot_transversal_field(relation, m, n, omega):
         labelleft='off',
         labelright='off') # labels along the bottom edge are off
     plt.plot([c,c], [0,b], "k-")
+    plt.title("$%s_{%d%d},\ %.1e\ rad/s$" %(family, m, n, omega))
     plt.savefig("field_%s_%d_%d_%.1e.pdf" %(family, m, n, omega))
     plt.cla()
 
 if __name__ == '__main__':
-
-    # start = timeit.default_timer()
-    # plot_transversal(e_relation, [1,2,3], [2e10, 4e10, 6e10, 8e10], 1e-4)
-    # stop = timeit.default_timer()
-    # print(stop - start)
-    # start = timeit.default_timer()
-    # plot_transversal(m_relation, [1,2,3], [3e10, 5e10, 7e10], 1e-3)
-    # print(transversal_wavenumbers(m_relation, 1, 3e10, 1e-3))
-    # stop = timeit.default_timer()
-    # print(stop - start)
-    #plot_longitudinal(e_relation, [2,3], [1,2],
-            #np.linspace(2e10, 10e10, 200), 1e-4)
-    #plot_longitudinal(m_relation, [2,3], [0,1,2],
-            #np.linspace(2e10, 10e10, 200), 1e-4)
-    # plot_transversal_field(m_relation, 2, 1, 7e10)
+    plot_transversal_field(m_relation, 1, 0, 2e10)
+    plot_transversal_field(e_relation, 0, 1, 2.5e10)
+    plot_transversal_field(m_relation, 1, 1, 2.9e10)
+    plot_transversal_field(m_relation, 2, 0, 5e10)
+    plot_transversal_field(e_relation, 0, 2, 4e10)
+    plot_transversal_field(e_relation, 1, 1, 4e10)
+    plot_transversal_field(m_relation, 1, 2, 4e10)
     plot_transversal_field(e_relation, 2, 1, 7e10)
+    plot_transversal_field(m_relation, 2, 1, 5e10)
+    plot_transversal_field(m_relation, 3, 0, 9e10)
