@@ -201,7 +201,7 @@ def plot_transversal_field(relation, m, n, omega):
         H1y = -e0 * e1 * omega / u1 *\
             np.cos(u1*(X1 - a)) * np.sin(pi * n / b * Y1)
         H1xy = np.sqrt(H1x*H1x + H1y*H1y)
-    
+
     elif relation is m_relation:
         family = "m"
         # левая область (2): от 0 до с
@@ -230,18 +230,35 @@ def plot_transversal_field(relation, m, n, omega):
 
     Emax = max(E1xy.max(), E2xy.max())
     Hmax = max(H1xy.max(), H2xy.max())
+    if border_orientation == "|":
+            lw = 1.5 * E2xy / Emax
+            plt.streamplot(X2, Y2, E2x, E2y, density=.4, color="k", linewidth=lw)
 
-    lw = 1.5 * E2xy / Emax
-    plt.streamplot(X2, Y2, E2x, E2y, density=.4, color="k", linewidth=lw)
+            lw = 1.5 * H2xy / Hmax
+            plt.streamplot(X2, Y2, H2x, H2y, density=.4, color="b", linewidth=lw)
 
-    lw = 1.5 * H2xy / Hmax
-    plt.streamplot(X2, Y2, H2x, H2y, density=.4, color="b", linewidth=lw)
+            lw = 1.5 * E1xy / Emax
+            plt.streamplot(X1, Y1, E1x, E1y, density=.7, color="k", linewidth=lw)
 
-    lw = 1.5 * E1xy / Emax
-    plt.streamplot(X1, Y1, E1x, E1y, density=.7, color="k", linewidth=lw)
+            lw = 1.5 * H1xy / Hmax
+            plt.streamplot(X1, Y1, H1x, H1y, density=.7, color="b", linewidth=lw)
 
-    lw = 1.5 * H1xy / Hmax
-    plt.streamplot(X1, Y1, H1x, H1y, density=.7, color="b", linewidth=lw)
+            plt.plot([c,c], [0,b], "k-")
+
+    elif border_orientation == "-":
+            lw = 1.5 * E2xy.T / Emax
+            plt.streamplot(Y2.T, X2.T, E2y.T, E2x.T, density=.4, color="k", linewidth=lw)
+
+            lw = 1.5 * H2xy.T / Hmax
+            plt.streamplot(Y2.T, X2.T, H2y.T, H2x.T, density=.4, color="b", linewidth=lw)
+
+            lw = 1.5 * E1xy.T / Emax
+            plt.streamplot(Y1.T, X1.T, E1y.T, E1x.T, density=.7, color="k", linewidth=lw)
+
+            lw = 1.5 * H1xy.T / Hmax
+            plt.streamplot(Y1.T, X1.T, H1y.T, H1x.T, density=.7, color="b", linewidth=lw)
+            plt.plot([0,b], [c,c], "k-")
+
     plt.tick_params(
         axis='both',          # changes apply to both-axises
         which='both',      # both major and minor ticks are affected
@@ -253,16 +270,15 @@ def plot_transversal_field(relation, m, n, omega):
         labeltop='off',
         labelleft='off',
         labelright='off') # labels along the bottom edge are off
-    plt.plot([c,c], [0,b], "k-")
     plt.title("$%s_{%d%d},\ %.1e\ rad/s$" %(family, m, n, omega))
     plt.savefig("field_%s_%d_%d_%.1e.pdf" %(family, m, n, omega))
     plt.cla()
 
 
 if __name__ == '__main__':
-    plot_transversal_field(m_relation, 1, 0, 1.6e10)
-    plot_transversal_field(m_relation, 2, 0, 4e10)
-    plot_transversal_field(e_relation, 2, 1, 4.5e10)
-    plot_transversal_field(m_relation, 2, 1, 4.2e10)
-    plot_transversal_field(m_relation, 3, 0, 5e10)
+    #plot_transversal_field(m_relation, 1, 0, 1.6e10)
+    #plot_transversal_field(m_relation, 2, 0, 4e10)
+    plot_transversal_field(e_relation, 1, 2, 4.5e10)
+    #plot_transversal_field(m_relation, 2, 1, 4.2e10)
+    #plot_transversal_field(m_relation, 3, 0, 5e10)
 

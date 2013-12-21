@@ -1,8 +1,9 @@
 from math import pi
 
-a = 5.0
-b = 3.0
-c = 1.5
+a = 3.0
+b = 5.0
+c = 1.0
+border_orientation = "-"
 e1, m1, l1 = 1.0, 1.0, a - c
 e2, m2, l2 = 5.0, 1.0, c
 # скорость света, см/с
