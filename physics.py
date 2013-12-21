@@ -3,29 +3,29 @@ import matplotlib.pyplot as plt
 from settings import *
 
 
-def lm_dispersion_relation(u1_sqr, u2_sqr):
+def lm_dispersion_relation(sqr_u1, sqr_u2):
     '''
         Дисперсионное соотношение для LM-волн
         Если u_1^2 < 0, то волна экспонентцциально затухает в первой области
     '''
-    if u1_sqr < 0:
-        u1, u2 = sqrt(-u1_sqr), sqrt(u2_sqr)
+    if sqr_u1 < 0:
+        u1, u2 = np.sqrt(-sqr_u1), np.sqrt(sqr_u2)
         return -u1 * np.tanh(u1 * l1) / e1 + u2 * np.tan(u2 * l2) / e2
     else:
-        u1, u2 = sqrt(u1_sqr), sqrt(u2_sqr)
+        u1, u2 = np.sqrt(sqr_u1), np.sqrt(sqr_u2)
         return u1 * np.tan(u1 * l1) / e1 + u2 * np.tan(u2 * l2) / e2
 
 
-def le_dispersion_relation(u1_sqr, u2_sqr):
+def le_dispersion_relation(sqr_u1, sqr_u2):
     '''
         Дисперсионное соотношение для LE-волн
         Если u_1^2 < 0, то волна экспонентцциально затухает в первой области
     '''
-    if u1_sqr < 0:
-        u1, u2 = sqrt(-u1_sqr), sqrt(u2_sqr)
+    if sqr_u1 < 0:
+        u1, u2 = np.sqrt(-sqr_u1), np.sqrt(sqr_u2)
         return m1 * np.tanh(u1 * l1) / u1 + m2 * np.tan(u2 * l2) / u2
     else:
-        u1, u2 = sqrt(u1_sqr), sqrt(u2_sqr)
+        u1, u2 = np.sqrt(sqr_u1), np.sqrt(sqr_u2)
         return m1 * np.tan(u1 * l1) / u1 + m2 * np.tan(u2 * l2) / u2
 
 
@@ -51,46 +51,78 @@ def bisection(f, left, right, precision):
 
 
 def transversal_wavenumbers(relation, m, omega, precision):
-    if (m == 0):
-        return 0, 0
-    for i in range(2*m):
-        lt = ((2*m - i) / l2) ** 2 - (i / l1) ** 2 -\
-                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
-        rd = ((2*m - i - 1) / l2) ** 2 - ((i + 1) / l1) ** 2 -\
-                (2 * omega / sol / pi) ** 2 * (e2 * m2 - e1 * m1)
+    '''
+    u_1^2 |      |           m=2       |
+          |      |                     |
+          -------|---------------------|------
+          |      |                     |
+          |      |   u_1^2 = u_2^2-omega^2(e2m2 - e1m1)
+          |      |         /           |
+          |      |        /            |
+          |      |       /             |  m=2
+       1  |      |      /              |
+          | m=1  |     /               |
+          |      |    /                |
+          |      |   /                 |
+          |      |  /                  |
+          |      | /                   |
+          -------|/---------------------------
+       0  |      /       m=1           |
+          |     /|                     |
+          -----/-|---------------------|------
+          |  0/  |            1        |  u_2^2
+          |  /   |                     |
+          | /    |                     |
+          |/     |                     |
+          /      |                     |
+          | m=0  |                     |
+          |      |                     |
+    '''
+    delta = omega ** 2 * (e2*m2 - e1*m1) / sol ** 2 # sqr_u2 - sqr_u1
+    n = 2 * m - 1  # сумма индексов квадратов с возможным решением для
+                   # синусоидальных волн
 
-        if lt * rd < 0:
-            first = lambda x: x
-            second = lambda x:\
-                    (x ** 2 + (omega / sol) ** 2 * (e2 * m2 - e1 * m1)) ** 0.5
+    # границы квадратов
+    border1 = lambda i: (np.pi * i / 2 / l1) ** 2
+    border2 = lambda i: (np.pi * i / 2 / l2) ** 2
 
-            left = i * pi / 2.0 / l1
-            right = (i + 1) * pi / 2.0 / l1
-            down = (2 * m - i - 1) * pi / 2.0 / l2
-            up = (2 * m - i) * pi / 2.0 / l2
+    if relation is lm_dispersion_relation:
+        # sqr_top_harmonic_wavelength
+        sthw = border2(n+1)
 
-            new_left = down ** 2 -  (omega / sol) ** 2 * (e2 * m2 - e1 * m1)
-            new_right = up ** 2 -  (omega / sol) ** 2 * (e2 * m2 - e1 * m1)
-            if new_left > left ** 2:
-                left = new_left ** 0.5
-            if new_right < right ** 2:
-                right = new_right ** 0.5
+    elif relation is le_dispersion_relation:
+        # top_harmonic_wavelength
+        sthw = (bisection(lambda u2: m2 * np.tan(u2*l2) + m1*l1*u2,
+                        np.sqrt(border2(n)) + precision,
+                        np.sqrt(border2(n+1))-precision, precision))  ** 2
 
-            margin = 1e-7
-            if relation(left + margin, second(left + margin)) <= 0:
-                u1 = bisection(lambda x: relation(first(x),\
-                    second(x)), left + margin, right - margin, precision)
-                u2 = second(u1)
+    # проверка на наличие синусоидальной волны
+    if sthw > (omega / sol) ** 2 * (e2*m2 - e1*m1):
+        # синусоидальная волна существует, так как точка пересечения с осью
+        # лежит ниже максимально возможного значения
 
-                if DEBUG:
-                    print("m = %d, n1 = %d, n2 = %d, lt = %.2f, rd = %.2f" %\
-                        (m, i, 2*m - i - 1, lt, rd))
-                    print("left = %.2f, right = %.2f, u1 = %.4f, u2 = %.4f" %\
-                        (left, right, u1, u2))
-                    print("=" * 20)
+        # определимся с квадратом, в котором будем искать решение
+        for i in range(n+1):
+            if (border2(i) - border1(n+1-i) - omega**2 * (e2*m2-e1*m1)) *\
+               (border2(i+1) - border1(n-i) - omega**2 * (e2*m2-e1*m1)) < 0:
+                break
+        # определились: sqr_u2 лежит в пределах от border2(i) до border2(i+1)
+        # осталось бисекцией найти значение
+        sqr_u2 = bisection(lambda x: relation(x - delta, x),
+                        border2(i) + precision, border2(i+1) - precision,
+                        precision)
+        sqr_u1 = sqr_u2 - delta
+    else:
+        # волна затухает в поперечном сечении, так как точка пересечения с осью
+        # лежит выше максимально возможного значения
+        sqr_u2 = bisection(lambda x: relation(x - delta, x),
+                        border2(n) + precision, sthw, precision)
+        sqr_u1 = sqr_u2 - delta
+    return sqr_u1, sqr_u2
 
-                return u1, u2
-    return 0, 0
+print(transversal_wavenumbers(lm_dispersion_relation, 1, 4e10, 1e-4))
+print(transversal_wavenumbers(lm_dispersion_relation, 1, 5e10, 1e-4))
+print(transversal_wavenumbers(lm_dispersion_relation, 1, 6e10, 1e-4))
 
 
 def transversal_data(relation, m_list, omega_list, precision):
@@ -151,12 +183,11 @@ def transversal_data(relation, m_list, omega_list, precision):
 
 
 def longitudinal_wavenumber(relation, m, n, omega, precision):
-    u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
-    if (u1 > 0):
-        sqr_h = (omega / sol) ** 2 * e1 * m1 - u1 ** 2 - (pi * n / b) ** 2
-        if (sqr_h > 0):
-            h = sqr_h ** 0.5
-            return h
+    sqr_u1, sqr_u2 = transversal_wavenumbers(relation, m, omega, precision)
+    sqr_h = (omega / sol) ** 2 * e1 * m1 - sqr_u1 - (pi * n / b) ** 2
+    if (sqr_h > 0):
+        h = sqr_h ** 0.5
+        return h
     return 0
 
 

@@ -102,12 +102,12 @@ def plot_transversal_field(relation, m, n, omega, border_orientation="|"):
     Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
 
     # определяем поперечные и продольные волновые числа
-    u1_sqr, u2_sqr = transversal_wavenumbers(relation, m, omega, 1e-3)
-    h = ((omega/sol)**2 * e1 * m1 - u1_sqr - (pi*n/b) ** 2) ** 0.5
+    sqr_u1, sqr_u2 = transversal_wavenumbers(relation, m, omega, 1e-3)
+    h = ((omega/sol)**2 * e1 * m1 - sqr_u1 - (pi*n/b) ** 2) ** 0.5
 
-    if u1_sqr < 0:
+    if sqr_u1 < 0:
         # гиперболические волны
-        u1, u2 = np.sqrt(-u1_sqr), np.sqrt(u2_sqr)
+        u1, u2 = np.sqrt(-sqr_u1), np.sqrt(sqr_u2)
         if relation is lm_dispersion_relation:
             family = "lm"
             # левая область (2): от 0 до с
@@ -162,7 +162,7 @@ def plot_transversal_field(relation, m, n, omega, border_orientation="|"):
 
     else:
         # гармонические волны
-        u1, u2 = np.sqrt(u1_sqr), np.sqrt(u2_sqr)
+        u1, u2 = np.sqrt(sqr_u1), np.sqrt(sqr_u2)
         if relation is lm_dispersion_relation:
             family = "lm"
             # левая область (2): от 0 до с
