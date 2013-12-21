@@ -1,3 +1,4 @@
+# coding: utf-8
 from math import pi
 
 a = 5.0
