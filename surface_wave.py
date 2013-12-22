@@ -12,11 +12,11 @@ import matplotlib.pyplot as plt
 from math import pi, tan, log, tanh, cosh, sinh
 from settings import *
 
-def e_relation(u1, u2):
+def lm_relation(u1, u2):
     return -u1 * tanh(u1 * l1) / e1 + u2 * tan(u2 * l2) / e2
 
 
-def m_relation(u1, u2):
+def le_relation(u1, u2):
     return m1 * tanh(u1 * l1) / u1 + m2 * tan(u2 * l2) / u2
 
 
@@ -42,12 +42,12 @@ def bisection(f, left, right, precision):
 
 
 def transversal_wavenumbers(relation, m, omega, precision):
-    if relation is m_relation and (m == 0):
+    if relation is le_relation and (m == 0):
         return 0, 0
     first = lambda x: x
     second = lambda x:\
             ((omega / sol) ** 2 * (e2 * m2 - e1 * m1) - x ** 2) ** 0.5
-    j = 0 if relation is m_relation else 1
+    j = 0 if relation is le_relation else 1
     down = (2 * m - 1 + j) * pi / 2.0 / l2
     up = (2 * m + j) * pi / 2.0 / l2
 
@@ -82,7 +82,7 @@ def transversal_data(relation, m_list, omega_list, precision):
         "frequencies": []
     }
     for m in m_list:
-        j = 0 if relation is m_relation else 1
+        j = 0 if relation is le_relation else 1
         down = (2 * m - 1 + j) * pi / 2.0 / l2
         up = (2 * m + j) * pi / 2.0 / l2
         left = 0
@@ -105,10 +105,10 @@ def transversal_data(relation, m_list, omega_list, precision):
             u1, u2 = transversal_wavenumbers(relation, m, omega, precision)
             if u1 and u2:
                 result["solutions"].append([u1 ** 2, u2 ** 2])
-                
+
     for omega in omega_list:
         # рисуем окружность для частоты
-        n = 0 if relation is m_relation else 1
+        n = 0 if relation is le_relation else 1
         border = (pi * n / b) ** 2 - (omega/sol)**2 * e1 * m1
         if border < 0:
             border = 0
@@ -150,7 +150,7 @@ def plot_transversal_field(relation, m, n, omega):
     h = ((omega/sol)**2 * e1 * m1 + u1 **2 - (pi*n/b) ** 2) ** 0.5
     Y1, X1 = np.mgrid[0:b:91j, c:a:106j]
     Y2, X2 = np.mgrid[0:b:91j, 0:c:46j]
-    if relation is e_relation:
+    if relation is lm_relation:
         family = "e"
         # левая область (2): от 0 до с
         E2x = -(h ** 2 + (pi * n / b) ** 2) / u2 / h *\
@@ -175,8 +175,8 @@ def plot_transversal_field(relation, m, n, omega):
         H1y = e0 * e1 * omega / u1 *\
             np.cosh(u1*(X1 - a)) * np.sin(pi * n / b * Y1)
         H1xy = np.sqrt(H1x*H1x + H1y*H1y)
-    
-    elif relation is m_relation:
+
+    elif relation is le_relation:
         family = "m"
         # левая область (2): от 0 до с
         E2x = 0 * X2
@@ -251,13 +251,14 @@ def plot_transversal_field(relation, m, n, omega):
     plt.cla()
 
 if __name__ == '__main__':
-    #plot_transversal_field(m_relation, 1, 0, 2e10)
-    #plot_transversal_field(e_relation, 0, 1, 2.5e10)
-    #plot_transversal_field(m_relation, 1, 1, 2.9e10)
-    #plot_transversal_field(m_relation, 2, 0, 5e10)
-    #plot_transversal_field(e_relation, 0, 2, 4e10)
-    #plot_transversal_field(e_relation, 1, 1, 4e10)
-    #plot_transversal_field(m_relation, 1, 2, 4e10)
-    plot_transversal_field(e_relation, 1, 2, 7e10)
-    #plot_transversal_field(m_relation, 2, 1, 5e10)
-    #plot_transversal_field(m_relation, 3, 0, 9e10)
+    #plot_transversal_field(le_relation, 1, 0, 2e10)
+    #plot_transversal_field(lm_relation, 0, 1, 2.5e10)
+    #plot_transversal_field(le_relation, 1, 1, 2.9e10)
+    #plot_transversal_field(le_relation, 2, 0, 5e10)
+    #plot_transversal_field(lm_relation, 0, 2, 4e10)
+    #plot_transversal_field(lm_relation, 1, 1, 4e10)
+    #plot_transversal_field(le_relation, 1, 2, 4e10)
+    #plot_transversal_field(lm_relation, 1, 2, 7e10)
+    #plot_transversal_field(le_relation, 2, 1, 5e10)
+    #plot_transversal_field(le_relation, 3, 0, 9e10)
+
