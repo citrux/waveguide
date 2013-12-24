@@ -53,7 +53,7 @@
     \]
 Равенство должно выполняться при любых \( y \) и \( z \), поэтому
 \[
-    \boxed{h_1 = h_2 = h,\ n_1 = n_2 = n.}
+    h_1 = h_2 = h,\ n_1 = n_2 = n.
 \]
 Для определения вида \( H_{1z} \) найдём \( E_{1x} \):
 \begin{align*}
@@ -270,7 +270,6 @@
     \omega^2u_1u_2\left(\eps_1\mu_2 A +
     \eps_2\mu_1\frac{1}{A}\right),
 \]
-Теперь как проще упростить?
 \[
     2\frac{h^2\pi^2n^2}{b^2} =
     \beta_1^2 g_2^2 + \beta_2^2 g_1^2 -
@@ -314,16 +313,15 @@
     \frac{\eps_2}{\eps_1}\frac{u_1}{u_2}.
 \]
 Перепишем их в виде
-\[
+\begin{equation}
     \left[
-        \begin{array}{ll}
-            \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0
-            \quad & (\mu-\textit{соотношение}),\\
-            \frac{u_1\tg u_1 (a-c)}{\eps_1} + \frac{u_2\tg u_2 c}{\eps_2} = 0
-            \quad & (\eps-\textit{соотношение}).
+        \begin{array}{l}
+            \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,\\
+            \frac{u_1\tg u_1 (a-c)}{\eps_1} + \frac{u_2\tg u_2 c}{\eps_2} = 0.
         \end{array}
     \right.
-\]
+    \label{sys:relations}
+\end{equation}
 Указанные выше выражения получены при условии \( n \neq 0 \). При \( n = 0 \)
 имеем \( E_{z1} = E_{z2} = 0 \)
 \[
@@ -360,8 +358,10 @@
 \[
     \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,
 \]
-\subsubsection{\(\boldsymbol{\mu}\) - волны}
-Теперь используя \( \mu \) - соотношение
+совпадающее с первым уравнением системы (\ref{sys:relations}).
+
+\subsubsection{LE-волны}
+Теперь используя первое уравнение системы (\ref{sys:relations})
 \[
     \frac{\mu_1\tg u_1 (a-c)}{u_1} + \frac{\mu_2\tg u_2 c}{u_2} = 0,
 \]
@@ -385,7 +385,7 @@
 \]
 Аналогично
 \[
-    E_2 = H_2{\mu_2\omega\pi n}\frac{u_2hb}.
+    E_2 = H_2\frac{\mu_2\omega\pi n}{u_2hb}.
 \]
 А из четвёртого уравнения системы~(\ref{eq:fast_waves_continuity}).
 \[
@@ -424,8 +424,10 @@
     \end{array}
     \right.
 \]
+Эти волны не имеют одной из поперечных электрических компонент, поэтому называются
+продольно-электрическими (LE).
 
-\subsubsection{\(\boldsymbol{\eps}\) - волны}
+\subsubsection{LM-волны}
 А в случае
 \[
     \frac{u_1\tg u_1 (a-c)}{\eps_1} + \frac{u_2\tg u_2 c}{\eps_2} = 0,
@@ -481,3 +483,5 @@
     \end{array}
     \right.
 \]
+Эти волны не имеют одной из поперечных магнитных компонент, поэтому называются
+продольно-магнитными (LM).

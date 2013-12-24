@@ -1,16 +1,25 @@
 \documentclass[12pt]{hedsemwork}
 \usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
 \usepackage[russian]{babel}
 \usepackage{pscyr}
 \usepackage{graphicx}
 \usepackage[vectors,derivative]{hedmaths}
+\usepackage{float}
 \renewcommand{\arraystretch}{2}
 \renewcommand{\frac}{\dfrac}
 \DeclareMathSizes{12}{10}{6}{6}
+
+
+\faculty{Факультет электроники и вычислительной техники}
+\department{<<Физика>>}
+\subject{Электродинамика СВЧ}
+\student[m]{студент группы Ф-469\\Абдрахманов~В.~Л.}
+\teacher[m]{доцент, к.ф.-м.н.\\Грецов~М.~В.}
+
 \begin{document}
-\section{Связь компонент поля в волноводе}
-\input{maxwell}
-\section{Волны в волноводе с неоднородным заполнением}
+\maketitle
+\section{Волны в волноводе со слоистым заполнением}
 \begin{figure}[h]
     \center
     \includegraphics{scheme}
@@ -20,5 +29,10 @@
 \input{harmonic_waves}
 \subsection{Поверхностная волна в менее плотной среде}
 \input{surface_wave}
+\section{Дисперсионные соотношения}
+\input{dispersion}
+\pagebreak
+\section{Картина полей в поперечном сечении волновода}
+\input{waves}
 \end{document}
 
