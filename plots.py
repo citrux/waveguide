@@ -1,5 +1,6 @@
-from physics import lm_dispersion_relation, le_dispersion_relation
-
+import surface_waves as sw
+import harmonic_waves as hw
+from matplotlib import pyplot as plt
 
 def plot_transversal(relation, m_list, omega_list, precision):
     rel = hw.e_relation if relation=="e" else hw.m_relation
@@ -26,12 +27,10 @@ def plot_transversal(relation, m_list, omega_list, precision):
         plt.plot(-x, y, "ko", markersize=3)
     plt.xlabel(r"$u_1^2, cm^{-2}$")
     plt.ylabel(r"$u_2^2, cm^{-2}$")
-    save_file(plt, relation + ".pdf")
-    plt.cla()
-
+    return plt
 
 def plot_longitudinal(m_list, n_list, omega_list, precision):
-    for m, n in [(1,0), (1,1), (2,0), (1,2), (2,1), (3,0)]:
+    for m, n in [(1,0), (1,1), (1,2), (1,3), (2,0)]:
             h_list, o_list = [], []
             for omega in omega_list:
                 h = hw.longitudinal_wavenumber(hw.m_relation, m, n, omega, precision)
@@ -52,12 +51,12 @@ def plot_longitudinal(m_list, n_list, omega_list, precision):
                     break;
             plt.plot(o_list, h_list, "b--")
             if h_list:
-                plt.annotate(r"$\mu_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
+                plt.annotate(r"$LE_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
             # print("plot m %d %d" %(m,n))
 
             # ------------------------------
             # ------------------------------
-    for m, n in [(0,1), (0,2), (1,1), (2,1)]:
+    for m, n in [(0,1), (0,2), (1,1), (0,3), (1,2), (2,0)]:
             if (n == 0):
                 continue
             print(n)
@@ -81,15 +80,13 @@ def plot_longitudinal(m_list, n_list, omega_list, precision):
                     break;
             plt.plot(o_list, h_list, "k--")
             if h_list:
-                plt.annotate(r"$\varepsilon_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
+                plt.annotate(r"$LM_{%d%d}$" % (m,n), (o_list[-1], h_list[-1]))
 
             # plt.annotate
             # print("plot e %d %d" %(m,n))
     plt.xlabel(r"$\omega, rad/s$")
     plt.ylabel(r"$h, cm^{-1}$")
-    save_file(plt, "dispersion.pdf")
-    plt.cla()
-
+    return plt
 
 def plot_transversal_field(relation, m, n, omega, border_orientation="|"):
     '''
